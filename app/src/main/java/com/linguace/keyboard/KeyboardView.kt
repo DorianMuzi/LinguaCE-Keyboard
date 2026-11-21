@@ -58,14 +58,17 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     private val density = resources.displayMetrics.density
     /**
-     * Hauteur d'une rangée : 42 dp pour toutes, la taille que l'auteur a
-     * trouvée juste sur son téléphone (essais à 54 puis 48 dp, trop hauts —
-     * 2026-11-21).
+     * Hauteur des rangées, réglée sur le téléphone de l'auteur (2026-11-21) :
+     * 42 dp pour le latin, qui a 5 rangées (54 puis 48 dp étaient trop hauts) ;
+     * 48 dp pour le cyrillique et les symboles, qui n'en ont que 4 (42 dp les
+     * rendait trop petits, avec 11 touches par rangée en cyrillique).
      */
-    private val rowHeight = 42 * density
+    private val compactRowHeight = 42 * density
+    private val rowHeight = 48 * density
 
     @Suppress("UNUSED_PARAMETER")
-    private fun rowHeightOf(r: Int): Float = rowHeight
+    private fun rowHeightOf(r: Int): Float =
+        if (layout.rows.size >= 5) compactRowHeight else rowHeight
     private val gap = 5 * density
     private val radius = 7 * density
 
@@ -195,6 +198,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         text.textSize = when (k.type) {
             KeyType.CHAR -> 20 * density
             KeyType.SPACE -> 13 * density
+            // Symboles des touches de fonction : ⇧ ⌫ ↵ étaient trop petits.
+            KeyType.SHIFT -> 26 * density
+            KeyType.DELETE, KeyType.ENTER -> 24 * density
             else -> 16 * density
         }
         if (k.type == KeyType.SPACE) text.color = hintColor
