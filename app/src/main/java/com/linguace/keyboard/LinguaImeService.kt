@@ -308,6 +308,27 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
             prefs.edit().putInt(EPOCH_KEY, prefs.getInt(EPOCH_KEY, 0) + 1).apply()
         }
 
+        /** Mots appris (dictionnaire personnel), les plus utilisés d'abord. */
+        fun learnedEntries(context: Context): List<Pair<String, Int>> =
+            WordStore().apply {
+                load(runCatching { File(context.filesDir, LEARNED_FILE).readText() }.getOrDefault(""))
+            }.entries()
+
+        /**
+         * Modifie les mots appris depuis l'écran du dictionnaire. Le clavier
+         * les recharge à sa prochaine ouverture (même mécanisme que
+         * l'effacement : le compteur d'époque change).
+         */
+        fun editLearned(context: Context, edit: (WordStore) -> Unit) {
+            val file = File(context.filesDir, LEARNED_FILE)
+            val store = WordStore()
+            store.load(runCatching { file.readText() }.getOrDefault(""))
+            edit(store)
+            runCatching { file.writeText(store.serialize()) }
+            val prefs = context.getSharedPreferences("keyboard", Context.MODE_PRIVATE)
+            prefs.edit().putInt(EPOCH_KEY, prefs.getInt(EPOCH_KEY, 0) + 1).apply()
+        }
+
         /** Mots appris absents de la liste de base (à proposer au projet). */
         fun newWords(context: Context): List<String> {
             val seed = runCatching {

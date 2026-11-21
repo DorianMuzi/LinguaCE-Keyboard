@@ -32,4 +32,16 @@
     <string name="set_sound">Son à chaque touche</string>
     <string name="set_vibrate">Vibration à chaque touche</string>
     <string name="set_latin_layout">Disposition latine</string>
+    <string name="setup_dictionary">Dictionnaire personnel (%1$d)</string>
+    <string name="dict_title">Dictionnaire personnel</string>
+    <string name="dict_intro">Les mots que le clavier a appris de toi, les plus utilisés d\'abord. Supprime ceux que tu ne veux plus voir proposés, ou ajoute les tiens (prénoms, lieux…).</string>
+    <string name="dict_add_hint">Chercher ou ajouter un mot…</string>
+    <string name="dict_add">Ajouter</string>
+    <string name="dict_empty">Aucun mot pour l\'instant.</string>
+    <string name="dict_uses">%1$d×</string>
+    <string name="dict_delete">Supprimer « %1$s »</string>
+    <string name="dict_added">« %1$s » ajouté.</string>
+    <string name="dict_invalid">Un mot : au moins deux lettres, sans chiffre ni symbole.</string>
+    <string name="dict_clear_all">Tout effacer</string>
+    <string name="dict_clear_confirm">Effacer tous les mots appris ?</string>
 </resources>

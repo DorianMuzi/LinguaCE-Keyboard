@@ -105,6 +105,29 @@ class SuggestionsTest {
     }
 
     @Test
+    fun personalDictionary_listRemoveAdd() {
+        val s = WordStore(seed)
+        s.learn("zarg")
+        s.learn("baq̇o")
+        s.learn("baq̇o")
+        assertEquals(listOf("baq̇o" to 2, "zarg" to 1), s.entries())
+
+        s.remove("Zarg") // la casse ne compte pas
+        assertEquals(listOf("baq̇o" to 2), s.entries())
+        assertTrue(s.suggest("za").isEmpty())
+
+        // Un mot ajouté à la main passe devant et garde le palotchka.
+        assertTrue(s.add("  ХьаӀаж "))
+        assertEquals("хьаӀаж", s.entries().first().first)
+        assertEquals("хьаӀаж", s.suggest("хьа").first())
+
+        // Pas un mot : refusé.
+        assertFalse(s.add("a"))
+        assertFalse(s.add("12"))
+        assertFalse(s.add("a b"))
+    }
+
+    @Test
     fun currentWord_isTheLettersBeforeTheCursor() {
         assertEquals("Naxç̇", WordStore.currentWord("Salam, Naxç̇"))
         assertEquals("", WordStore.currentWord("Salam "))

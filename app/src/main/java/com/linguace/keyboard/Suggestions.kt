@@ -65,6 +65,30 @@ class WordStore(private val seed: Map<String, Int> = emptyMap()) {
 
     fun clear() = learned.clear()
 
+    // ─── Dictionnaire personnel ─────────────────────────────────
+    /** Mots appris et leur nombre d'emplois, les plus utilisés d'abord. */
+    fun entries(): List<Pair<String, Int>> =
+        learned.entries
+            .sortedWith(compareByDescending<Map.Entry<String, Int>> { it.value }.thenBy { it.key })
+            .map { it.key to it.value }
+
+    /** Retire un mot : il ne sera plus proposé (sauf s'il est dans la liste de base). */
+    fun remove(word: String) {
+        learned.remove(lower(word))
+    }
+
+    /**
+     * Ajoute un mot de l'utilisateur (prénom, lieu…), tel qu'il l'écrit : il
+     * passe devant les mots seulement rencontrés. Renvoie `false` si ce n'est
+     * pas un mot (au moins deux lettres, sans chiffre ni symbole).
+     */
+    fun add(word: String): Boolean {
+        val w = lower(word.trim())
+        if (!isWord(w)) return false
+        learned[w] = maxOf(learned[w] ?: 0, ADDED_WEIGHT)
+        return true
+    }
+
     /**
      * Mots appris que la liste de base ne connaît pas encore, les plus
      * utilisés d'abord : ceux que l'utilisateur peut proposer au projet.
@@ -120,6 +144,9 @@ class WordStore(private val seed: Map<String, Int> = emptyMap()) {
 
     companion object {
         const val MAX_LEARNED = 5000
+
+        /** Poids d'un mot ajouté à la main (comme s'il avait été tapé 20 fois). */
+        const val ADDED_WEIGHT = 20
         const val MAX_LENGTH = 40
 
         /** Minuscules, sauf le palotchka : Ӏ (U+04C0) ne s'écrit jamais ӏ en tchétchène. */

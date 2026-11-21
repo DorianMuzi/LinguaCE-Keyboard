@@ -35,4 +35,16 @@
     <string name="set_sound">Sound on each key</string>
     <string name="set_vibrate">Vibrate on each key</string>
     <string name="set_latin_layout">Latin layout</string>
+    <string name="setup_dictionary">Personal dictionary (%1$d)</string>
+    <string name="dict_title">Personal dictionary</string>
+    <string name="dict_intro">Words the keyboard has learned from you, most used first. Delete the ones you do not want suggested, or add your own (names, places…).</string>
+    <string name="dict_add_hint">Search or add a word…</string>
+    <string name="dict_add">Add</string>
+    <string name="dict_empty">No word yet.</string>
+    <string name="dict_uses">%1$d×</string>
+    <string name="dict_delete">Delete “%1$s”</string>
+    <string name="dict_added">“%1$s” added.</string>
+    <string name="dict_invalid">A word has at least two letters, with no digits or symbols.</string>
+    <string name="dict_clear_all">Erase all</string>
+    <string name="dict_clear_confirm">Erase all learned words?</string>
 </resources>

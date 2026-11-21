@@ -31,4 +31,16 @@
     <string name="set_sound">Звук при нажатии</string>
     <string name="set_vibrate">Вибрация при нажатии</string>
     <string name="set_latin_layout">Латинская раскладка</string>
+    <string name="setup_dictionary">Личный словарь (%1$d)</string>
+    <string name="dict_title">Личный словарь</string>
+    <string name="dict_intro">Слова, которые клавиатура выучила у вас, — сначала самые частые. Удалите те, которые не хотите видеть в подсказках, или добавьте свои (имена, места…).</string>
+    <string name="dict_add_hint">Найти или добавить слово…</string>
+    <string name="dict_add">Добавить</string>
+    <string name="dict_empty">Пока нет слов.</string>
+    <string name="dict_uses">%1$d×</string>
+    <string name="dict_delete">Удалить «%1$s»</string>
+    <string name="dict_added">«%1$s» добавлено.</string>
+    <string name="dict_invalid">Слово — минимум две буквы, без цифр и символов.</string>
+    <string name="dict_clear_all">Стереть всё</string>
+    <string name="dict_clear_confirm">Стереть все выученные слова?</string>
 </resources>
