@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -42,15 +43,20 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         fun onSuggestion(word: String)
     }
 
+    /** Appelé quand la bande apparaît ou disparaît (zone visible modifiée). */
+    var onContentTopChanged: (() -> Unit)? = null
+
     /** Mots proposés dans la bande du haut (3 au plus). */
     var suggestions: List<String> = emptyList()
         set(value) {
             if (field == value) return
-            val resize = field.isEmpty() != value.isEmpty()
+            val shown = field.isEmpty() != value.isEmpty()
             field = value
-            // La bande n'apparaît que s'il y a des mots à proposer (demande de
-            // l'auteur) : le clavier change donc de hauteur à ce moment-là.
-            if (resize) requestLayout() else place()
+            place()
+            // La bande n'apparaît que s'il y a des mots (demande de l'auteur) :
+            // la hauteur ne change pas, seule la zone visible et touchable
+            // change — on demande au système de la recalculer.
+            if (shown) onContentTopChanged?.invoke()
             invalidate()
             announceChange()
         }
@@ -101,8 +107,21 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private val rowGap = 10 * density
     private val radius = 7 * density
     private val stripHeight = 40 * density
+    /**
+     * Place de la bande de suggestions, TOUJOURS réservée (hors mots de passe) :
+     * la hauteur du clavier ne change jamais, donc les touches ne bougent
+     * jamais sous les doigts. Quand il n'y a pas de suggestion, cette bande
+     * est transparente et laisse passer les touchers vers l'app (voir
+     * [contentTop] et LinguaImeService.onComputeInsets) : on ne la voit pas.
+     * Une bande qui apparaissait en changeant la hauteur faisait taper des
+     * lettres de la mauvaise rangée en frappe rapide.
+     */
     private val stripSpace: Float
-        get() = if (showStrip && suggestions.isNotEmpty()) stripHeight else 0f
+        get() = if (showStrip) stripHeight else 0f
+
+    /** Haut de la partie visible et touchable du clavier, dans la vue. */
+    val contentTop: Int
+        get() = if (suggestions.isEmpty()) stripSpace.toInt() else 0
 
     private val dark =
         (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
@@ -214,7 +233,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     // ─── Dessin ─────────────────────────────────────────────────
     override fun onDraw(canvas: Canvas) {
-        canvas.drawColor(bgColor)
+        // Fond seulement sous la partie visible : la bande vide reste transparente.
+        fill.color = bgColor
+        canvas.drawRect(0f, contentTop.toFloat(), width.toFloat(), height.toFloat(), fill)
         for (p in placed) drawKey(canvas, p)
         popupKey?.let { drawPopup(canvas) }
     }
@@ -419,49 +440,118 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
+    // ─── Retour sonore et vibration (réglages de l'écran d'installation) ───
+    /** Son à chaque touche, comme l'option de Gboard (désactivé par défaut). */
+    var soundOn = false
+
+    /** Vibration à chaque touche (activée par défaut). */
+    var vibrateOn = true
+
+    private val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+    private fun feedback(k: Key) {
+        if (vibrateOn) performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+        if (soundOn) {
+            audio.playSoundEffect(
+                when (k.type) {
+                    KeyType.SPACE -> AudioManager.FX_KEYPRESS_SPACEBAR
+                    KeyType.DELETE -> AudioManager.FX_KEYPRESS_DELETE
+                    KeyType.ENTER -> AudioManager.FX_KEYPRESS_RETURN
+                    else -> AudioManager.FX_KEYPRESS_STANDARD
+                },
+                -1f, // volume des sons du système
+            )
+        }
+    }
+
+    // ─── Frappe rapide ──────────────────────────────────────────
+    // Plusieurs doigts : quand un nouveau doigt se pose alors que le précédent
+    // n'est pas encore levé (frappe rapide à deux pouces), la touche du doigt
+    // précédent est tapée tout de suite — comme Gboard. Sans cela, des lettres
+    // se perdaient ou arrivaient en retard (retour de l'auteur).
+    private var pointerId = -1
+
+    private fun press(p: Placed) {
+        pressed = p
+        longPressed = false
+        repeating = false
+        feedback(p.key)
+        if (p.key.type == KeyType.DELETE) handler.postDelayed(repeat, 400)
+        if (p.key.popup.isNotEmpty() || p.key.type == KeyType.GLOBE) {
+            handler.postDelayed(longPress, 350)
+        }
+        invalidate()
+    }
+
+    /** Termine l'appui en cours : tape sa touche (ou la lettre choisie). */
+    private fun release() {
+        handler.removeCallbacks(longPress)
+        handler.removeCallbacks(repeat)
+        val p = pressed
+        when {
+            popupKey != null -> listener.onText(
+                popupRects[popupIndex].first.let {
+                    if (shift != ShiftState.OFF) Alphabet.upper(it) else it
+                },
+            )
+            p == null || longPressed || repeating -> Unit
+            else -> fire(p.key)
+        }
+        reset()
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(e: MotionEvent): Boolean {
         when (e.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                val p = keyAt(e.x, e.y) ?: return true
-                pressed = p
-                longPressed = false
-                repeating = false
-                performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                if (p.key.type == KeyType.DELETE) handler.postDelayed(repeat, 400)
-                if (p.key.popup.isNotEmpty() || p.key.type == KeyType.GLOBE) {
-                    handler.postDelayed(longPress, 350)
-                }
-                invalidate()
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                // Un doigt était déjà posé : sa touche part avant la nouvelle.
+                if (pressed != null) release()
+                val i = e.actionIndex
+                val p = keyAt(e.getX(i), e.getY(i)) ?: return true
+                pointerId = e.getPointerId(i)
+                press(p)
             }
             MotionEvent.ACTION_MOVE -> {
+                val i = e.findPointerIndex(pointerId)
+                if (i < 0) return true
+                val x = e.getX(i)
+                val y = e.getY(i)
                 if (popupKey != null) {
-                    val i = popupRects.indexOfFirst { e.x < it.second.right + gap / 2 }
-                    val next = if (i == -1) popupRects.lastIndex else i
+                    val j = popupRects.indexOfFirst { x < it.second.right + gap / 2 }
+                    val next = if (j == -1) popupRects.lastIndex else j
                     if (next != popupIndex) {
                         popupIndex = next
                         invalidate()
                     }
+                } else if (!longPressed && !repeating) {
+                    // Le doigt glisse sur une autre touche avant d'être levé :
+                    // c'est elle qui sera tapée (comme Gboard).
+                    val p = keyAt(x, y)
+                    if (p != null && p != pressed && p.key.type != KeyType.SUGGESTION &&
+                        pressed?.key?.type != KeyType.SUGGESTION
+                    ) {
+                        handler.removeCallbacks(longPress)
+                        handler.removeCallbacks(repeat)
+                        pressed = p
+                        if (p.key.popup.isNotEmpty() || p.key.type == KeyType.GLOBE) {
+                            handler.postDelayed(longPress, 350)
+                        }
+                        invalidate()
+                    }
                 }
             }
-            MotionEvent.ACTION_UP -> {
-                handler.removeCallbacks(longPress)
-                handler.removeCallbacks(repeat)
-                val p = pressed
-                when {
-                    popupKey != null -> listener.onText(
-                        popupRects[popupIndex].first.let {
-                            if (shift != ShiftState.OFF) Alphabet.upper(it) else it
-                        },
-                    )
-                    p == null || longPressed || repeating -> Unit
-                    else -> fire(p.key)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
+                // Seul le doigt de l'appui en cours compte ; un doigt déjà
+                // « tapé » par l'arrivée d'un autre ne fait plus rien.
+                if (e.getPointerId(e.actionIndex) == pointerId) {
+                    release()
+                    pointerId = -1
                 }
-                reset()
             }
             MotionEvent.ACTION_CANCEL -> {
                 handler.removeCallbacks(longPress)
                 handler.removeCallbacks(repeat)
+                pointerId = -1
                 reset()
             }
         }

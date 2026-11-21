@@ -32,4 +32,6 @@
     <string name="share_none">No new learned words yet.</string>
     <string name="share_subject">Words suggested for LinguaCE</string>
     <string name="share_intro">Here are Chechen words I use, suggested for the LinguaCE keyboard:</string>
+    <string name="set_sound">Sound on each key</string>
+    <string name="set_vibrate">Vibrate on each key</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.linguace.keyboard
 
+import android.view.MotionEvent
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeProvider
@@ -136,6 +137,54 @@ class KeyboardAccessibilityTest {
         onMain { view.showStrip = false; view.suggestions = listOf("noxçiyŋ") }
         val label = desc(R.string.key_suggestion).replace("%1\$s", "noxçiyŋ")
         assertTrue(nodes()[label] == null)
+    }
+
+    // ─── Frappe rapide (plusieurs doigts) ───────────────────────
+    private fun center(name: String): Pair<Float, Float> {
+        val (_, node) = nodes()[name]!!
+        val r = android.graphics.Rect()
+        @Suppress("DEPRECATION")
+        node.getBoundsInParent(r)
+        return r.exactCenterX() to r.exactCenterY()
+    }
+
+    private fun event(action: Int, vararg pointers: Pair<Int, Pair<Float, Float>>): MotionEvent {
+        val props = pointers.map { (id, _) ->
+            MotionEvent.PointerProperties().apply { this.id = id; toolType = MotionEvent.TOOL_TYPE_FINGER }
+        }.toTypedArray()
+        val coords = pointers.map { (_, xy) ->
+            MotionEvent.PointerCoords().apply { x = xy.first; y = xy.second; pressure = 1f; size = 1f }
+        }.toTypedArray()
+        return MotionEvent.obtain(0, 0, action, pointers.size, props, coords, 0, 0, 1f, 1f, 0, 0, 0, 0)
+    }
+
+    @Test
+    fun secondFinger_typesTheFirstKeyAtOnce_noLetterLost() {
+        val q = center("q")
+        val w = center("w")
+        onMain {
+            view.onTouchEvent(event(MotionEvent.ACTION_DOWN, 0 to q))
+            // Le pouce droit se pose sur w avant que le gauche ait quitté q.
+            view.onTouchEvent(event(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT), 0 to q, 1 to w))
+        }
+        assertEquals("q part dès que le deuxième doigt se pose", listOf("q"), typed)
+        onMain {
+            view.onTouchEvent(event(MotionEvent.ACTION_POINTER_UP or (0 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT), 0 to q, 1 to w))
+            view.onTouchEvent(event(MotionEvent.ACTION_UP, 1 to w))
+        }
+        assertEquals(listOf("q", "w"), typed)
+    }
+
+    @Test
+    fun slidingToANeighbourKey_typesThatKey() {
+        val q = center("q")
+        val w = center("w")
+        onMain {
+            view.onTouchEvent(event(MotionEvent.ACTION_DOWN, 0 to q))
+            view.onTouchEvent(event(MotionEvent.ACTION_MOVE, 0 to w))
+            view.onTouchEvent(event(MotionEvent.ACTION_UP, 0 to w))
+        }
+        assertEquals(listOf("w"), typed)
     }
 
     private fun AccessibilityNodeInfo.boundsInScreenNonEmpty(): Boolean {

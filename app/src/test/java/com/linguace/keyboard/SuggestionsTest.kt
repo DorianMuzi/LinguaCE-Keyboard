@@ -93,6 +93,18 @@ class SuggestionsTest {
     }
 
     @Test
+    fun wordTypedWithoutAccents_learnsTheCorrectSpelling() {
+        val s = WordStore(seed)
+        s.learn("noxciyn")
+        s.learn("noxciyn")
+        assertEquals("noxçiyŋ", s.suggest("nox").first())
+        assertFalse("noxciyn" in s.suggest("nox"))
+        // Un mot inconnu sans accents reste appris tel quel.
+        s.learn("zarg")
+        assertEquals("zarg", s.suggest("za").first())
+    }
+
+    @Test
     fun currentWord_isTheLettersBeforeTheCursor() {
         assertEquals("Naxç̇", WordStore.currentWord("Salam, Naxç̇"))
         assertEquals("", WordStore.currentWord("Salam "))

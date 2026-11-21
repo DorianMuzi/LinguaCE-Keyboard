@@ -18,6 +18,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.Switch
 import android.widget.TextView
 
 /** Écran d'installation : activer le clavier, le choisir, l'essayer. */
@@ -70,6 +71,21 @@ class SetupActivity : Activity() {
             setHint(R.string.setup_try)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
         }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(16) })
+        // Son et vibration à chaque touche (comme les options de Gboard).
+        val prefs = getSharedPreferences("keyboard", Context.MODE_PRIVATE)
+        fun toggle(label: Int, key: String, default: Boolean) = Switch(this).apply {
+            setText(label)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            isChecked = prefs.getBoolean(key, default)
+            minHeight = dp(48)
+            setOnCheckedChangeListener { _, on -> prefs.edit().putBoolean(key, on).apply() }
+        }
+        column.addView(
+            toggle(R.string.set_sound, LinguaImeService.SOUND_KEY, false),
+            LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(16) },
+        )
+        column.addView(toggle(R.string.set_vibrate, LinguaImeService.VIBRATE_KEY, true))
+
         column.addView(text(R.string.setup_privacy, 14f).apply { setPadding(0, dp(24), 0, dp(8)) })
 
         // Suggestions : les mots appris restent sur le téléphone, effaçables ici.

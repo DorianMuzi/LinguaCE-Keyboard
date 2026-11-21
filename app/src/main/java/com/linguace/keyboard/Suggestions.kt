@@ -38,16 +38,29 @@ class WordStore(private val seed: Map<String, Int> = emptyMap()) {
             w.all { it.isLetter() || Character.getType(it) == Character.NON_SPACING_MARK.toInt() } &&
             w.any { it.isLetter() }
 
-    /** Retient un mot tapé (en minuscules, la casse est rendue à l'affichage). */
+    /**
+     * Retient un mot tapé (en minuscules, la casse est rendue à l'affichage).
+     * Tapé sans accents alors qu'on connaît sa bonne graphie (« noxciyn »
+     * pour « noxçiyŋ ») : c'est la bonne graphie qui est retenue, pour ne pas
+     * proposer ensuite la forme fautive avant la bonne.
+     */
     fun learn(word: String) {
         if (!isWord(word)) return
-        val w = lower(word)
+        val w = correctSpelling(lower(word))
         learned[w] = (learned[w] ?: 0) + 1
         if (learned.size > MAX_LEARNED) {
             // On oublie les mots les moins utilisés.
             learned.entries.sortedBy { it.value }.take(learned.size - MAX_LEARNED)
                 .forEach { learned.remove(it.key) }
         }
+    }
+
+    /** Graphie connue (avec diacritiques) d'un mot tapé sans, sinon le mot tel quel. */
+    private fun correctSpelling(w: String): String {
+        if (w in seed || w in learned) return w
+        val f = Fold.fold(w)
+        if (f != w) return w // il a déjà des diacritiques : on le prend tel quel
+        return (seed.keys + learned.keys).firstOrNull { it != w && Fold.fold(it) == f } ?: w
     }
 
     fun clear() = learned.clear()

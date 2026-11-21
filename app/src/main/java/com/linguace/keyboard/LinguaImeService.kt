@@ -2,6 +2,8 @@ package com.linguace.keyboard
 
 import android.content.Context
 import android.inputmethodservice.InputMethodService
+import android.os.Handler
+import android.os.Looper
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
@@ -42,8 +44,31 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
     override fun onCreateInputView(): View =
         KeyboardView(this, this).also {
             it.layout = letters
+            // Bande apparue / disparue : seule la zone visible change, pas la
+            // hauteur ; un nouveau passage de mise en page recalcule les insets.
+            it.onContentTopChanged = { it.requestLayout() }
             view = it
         }
+
+    /**
+     * La fenêtre du clavier garde toujours la même hauteur (bande de
+     * suggestions comprise), mais on n'annonce comme visible et touchable que
+     * la partie réellement dessinée : sans suggestion, la bande est
+     * transparente, l'app ne se redimensionne pas pour elle et les touchers
+     * y passent vers l'app.
+     */
+    override fun onComputeInsets(outInsets: Insets) {
+        super.onComputeInsets(outInsets)
+        val v = view ?: return
+        if (!v.isShown) return
+        val loc = IntArray(2)
+        v.getLocationInWindow(loc)
+        val top = loc[1] + v.contentTop
+        outInsets.contentTopInsets = top
+        outInsets.visibleTopInsets = top
+        outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_REGION
+        outInsets.touchableRegion.set(0, top, loc[0] + v.width, loc[1] + v.height)
+    }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
@@ -53,8 +78,9 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         view?.layout = letters
         view?.shift = ShiftState.OFF
         view?.showStrip = suggest
-        autoShift()
-        updateSuggestions()
+        view?.soundOn = prefs.getBoolean(SOUND_KEY, false)
+        view?.vibrateOn = prefs.getBoolean(VIBRATE_KEY, true)
+        scheduleRefresh()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
@@ -63,6 +89,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
         saveLearned()
         super.onDestroy()
     }
@@ -72,7 +99,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         candidatesStart: Int, candidatesEnd: Int,
     ) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
-        updateSuggestions()
+        scheduleRefresh()
     }
 
     /**
@@ -110,8 +137,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         }
         ic.commitText(text, 1)
         if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
-        autoShift()
-        updateSuggestions()
+        scheduleRefresh()
     }
 
     override fun onSuggestion(word: String) {
@@ -123,8 +149,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         ic.endBatchEdit()
         if (learn) words.learn(word)
         if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
-        autoShift()
-        updateSuggestions()
+        scheduleRefresh()
     }
 
     override fun onDelete() {
@@ -142,8 +167,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
             }
         }
-        autoShift()
-        updateSuggestions()
+        scheduleRefresh()
     }
 
     override fun onEnter() {
@@ -159,7 +183,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         } else {
             ic.commitText("\n", 1)
         }
-        updateSuggestions()
+        scheduleRefresh()
     }
 
     /** ⇧ : une majuscule ; deux appuis rapprochés : verrouillage ; puis arrêt. */
@@ -191,6 +215,21 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
 
     override fun onLetters() {
         view?.layout = letters
+    }
+
+    // ─── Après chaque touche ────────────────────────────────────
+    // Majuscule automatique et suggestions demandent le texte au champ (un
+    // aller-retour avec l'app) : on les fait juste après, une seule fois même
+    // si plusieurs touches arrivent, pour que la lettre parte tout de suite.
+    private val handler = Handler(Looper.getMainLooper())
+    private val refresh = Runnable {
+        autoShift()
+        updateSuggestions()
+    }
+
+    private fun scheduleRefresh() {
+        handler.removeCallbacks(refresh)
+        handler.post(refresh)
     }
 
     // ─── Suggestions ────────────────────────────────────────────
@@ -241,6 +280,8 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         const val SEED_FILE = "seed_words.tsv"
         const val LEARNED_FILE = "learned_words.tsv"
         const val EPOCH_KEY = "words_epoch"
+        const val SOUND_KEY = "sound"
+        const val VIBRATE_KEY = "vibrate"
         private const val MAX_WORD = 48
 
         /** Efface les mots appris (écran d'installation). */
