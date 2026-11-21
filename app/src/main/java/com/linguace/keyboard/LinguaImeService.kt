@@ -7,10 +7,12 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import java.io.File
 
 /**
- * Le service de saisie. Il ne garde rien de ce qui est tapé : seul le choix
- * de la disposition (latin ou cyrillique) est mémorisé, pour la retrouver.
+ * Le service de saisie. Il ne transmet rien : seuls la disposition choisie et
+ * les mots appris pour les suggestions sont gardés, dans le stockage privé de
+ * l'app, sur le téléphone (pas de sauvegarde dans le cloud : allowBackup=false).
  */
 class LinguaImeService : InputMethodService(), KeyboardView.Listener {
 
@@ -20,9 +22,21 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
 
     private val prefs by lazy { getSharedPreferences("keyboard", Context.MODE_PRIVATE) }
 
+    private lateinit var words: WordStore
+    private var wordsEpoch = 0
+
+    /** Suggestions affichées dans ce champ ; apprentissage autorisé dans ce champ. */
+    private var suggest = true
+    private var learn = true
+
     override fun onCreate() {
         super.onCreate()
         letters = Layouts.byId(prefs.getString("layout", null))
+        val seed = runCatching {
+            assets.open(SEED_FILE).bufferedReader().use { it.readText() }
+        }.getOrDefault("")
+        words = WordStore(WordStore.parseSeed(seed))
+        loadLearned()
     }
 
     override fun onCreateInputView(): View =
@@ -33,17 +47,84 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        // Mots effacés depuis l'écran d'installation : on repart de zéro.
+        if (prefs.getInt(EPOCH_KEY, 0) != wordsEpoch) loadLearned()
+        configureField(info)
         view?.layout = letters
         view?.shift = ShiftState.OFF
+        view?.showStrip = suggest
         autoShift()
+        updateSuggestions()
+    }
+
+    override fun onFinishInputView(finishingInput: Boolean) {
+        super.onFinishInputView(finishingInput)
+        saveLearned()
+    }
+
+    override fun onDestroy() {
+        saveLearned()
+        super.onDestroy()
+    }
+
+    override fun onUpdateSelection(
+        oldSelStart: Int, oldSelEnd: Int, newSelStart: Int, newSelEnd: Int,
+        candidatesStart: Int, candidatesEnd: Int,
+    ) {
+        super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
+        updateSuggestions()
+    }
+
+    /**
+     * Jamais de suggestions dans un mot de passe ni si l'app les refuse ;
+     * jamais d'apprentissage non plus dans une adresse e-mail ou web, ni si
+     * l'app le demande (mode incognito : IME_FLAG_NO_PERSONALIZED_LEARNING).
+     */
+    private fun configureField(info: EditorInfo?) {
+        val type = info?.inputType ?: 0
+        val cls = type and InputType.TYPE_MASK_CLASS
+        val variation = type and InputType.TYPE_MASK_VARIATION
+        val password = (cls == InputType.TYPE_CLASS_TEXT && variation in setOf(
+            InputType.TYPE_TEXT_VARIATION_PASSWORD,
+            InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+        )) || (cls == InputType.TYPE_CLASS_NUMBER &&
+            variation == InputType.TYPE_NUMBER_VARIATION_PASSWORD)
+        val noSuggestions = type and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0
+        suggest = cls == InputType.TYPE_CLASS_TEXT && !password && !noSuggestions
+        val address = variation in setOf(
+            InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_URI,
+        )
+        val incognito = (info?.imeOptions ?: 0) and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING != 0
+        learn = suggest && !address && !incognito
     }
 
     // ─── Saisie ─────────────────────────────────────────────────
     override fun onText(text: String) {
         val ic = currentInputConnection ?: return
+        // Un séparateur (espace, ponctuation) termine le mot : on l'apprend.
+        if (text.none { it.isLetter() || Character.getType(it) == Character.NON_SPACING_MARK.toInt() }) {
+            learnCurrentWord()
+        }
         ic.commitText(text, 1)
         if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
         autoShift()
+        updateSuggestions()
+    }
+
+    override fun onSuggestion(word: String) {
+        val ic = currentInputConnection ?: return
+        val typed = WordStore.currentWord(ic.getTextBeforeCursor(MAX_WORD, 0) ?: "")
+        ic.beginBatchEdit()
+        if (typed.isNotEmpty()) ic.deleteSurroundingText(typed.length, 0)
+        ic.commitText("$word ", 1)
+        ic.endBatchEdit()
+        if (learn) words.learn(word)
+        if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
+        autoShift()
+        updateSuggestions()
     }
 
     override fun onDelete() {
@@ -62,10 +143,12 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
             }
         }
         autoShift()
+        updateSuggestions()
     }
 
     override fun onEnter() {
         val ic = currentInputConnection ?: return
+        learnCurrentWord()
         val info = currentInputEditorInfo
         val action = info?.imeOptions?.and(EditorInfo.IME_MASK_ACTION) ?: EditorInfo.IME_ACTION_NONE
         val noAction = (info?.imeOptions ?: 0) and EditorInfo.IME_FLAG_NO_ENTER_ACTION != 0
@@ -76,6 +159,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         } else {
             ic.commitText("\n", 1)
         }
+        updateSuggestions()
     }
 
     /** ⇧ : une majuscule ; deux appuis rapprochés : verrouillage ; puis arrêt. */
@@ -109,6 +193,38 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         view?.layout = letters
     }
 
+    // ─── Suggestions ────────────────────────────────────────────
+    private fun updateSuggestions() {
+        val v = view ?: return
+        if (!suggest) {
+            v.suggestions = emptyList()
+            return
+        }
+        val before = currentInputConnection?.getTextBeforeCursor(MAX_WORD, 0) ?: ""
+        v.suggestions = words.suggest(WordStore.currentWord(before))
+    }
+
+    private fun learnCurrentWord() {
+        if (!learn) return
+        val before = currentInputConnection?.getTextBeforeCursor(MAX_WORD, 0) ?: return
+        words.learn(WordStore.currentWord(before))
+    }
+
+    private val learnedFile: File get() = File(filesDir, LEARNED_FILE)
+
+    private fun loadLearned() {
+        wordsEpoch = prefs.getInt(EPOCH_KEY, 0)
+        val text = runCatching { learnedFile.readText() }.getOrDefault("")
+        words.load(text)
+    }
+
+    private fun saveLearned() {
+        if (!::words.isInitialized) return
+        // Effacés entre-temps depuis l'écran d'installation : ne pas réécrire.
+        if (prefs.getInt(EPOCH_KEY, 0) != wordsEpoch) return
+        runCatching { learnedFile.writeText(words.serialize()) }
+    }
+
     /** Majuscule automatique en début de phrase, si le champ la demande. */
     private fun autoShift() {
         val v = view ?: return
@@ -119,5 +235,24 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         val isText = type and InputType.TYPE_MASK_CLASS == InputType.TYPE_CLASS_TEXT
         val caps = isText && ic.getCursorCapsMode(type) != 0
         v.shift = if (caps) ShiftState.ONCE else ShiftState.OFF
+    }
+
+    companion object {
+        const val SEED_FILE = "seed_words.tsv"
+        const val LEARNED_FILE = "learned_words.tsv"
+        const val EPOCH_KEY = "words_epoch"
+        private const val MAX_WORD = 48
+
+        /** Efface les mots appris (écran d'installation). */
+        fun clearLearned(context: Context) {
+            File(context.filesDir, LEARNED_FILE).delete()
+            val prefs = context.getSharedPreferences("keyboard", Context.MODE_PRIVATE)
+            prefs.edit().putInt(EPOCH_KEY, prefs.getInt(EPOCH_KEY, 0) + 1).apply()
+        }
+
+        fun learnedCount(context: Context): Int =
+            runCatching {
+                File(context.filesDir, LEARNED_FILE).readLines().count { it.contains('\t') }
+            }.getOrDefault(0)
     }
 }

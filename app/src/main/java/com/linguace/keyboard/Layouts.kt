@@ -2,7 +2,8 @@ package com.linguace.keyboard
 
 import com.linguace.keyboard.Alphabet.DOT
 
-enum class KeyType { CHAR, SHIFT, DELETE, ENTER, SPACE, GLOBE, SYMBOLS, LETTERS }
+/** SUGGESTION : un mot proposé dans la bande au-dessus des touches. */
+enum class KeyType { CHAR, SHIFT, DELETE, ENTER, SPACE, GLOBE, SYMBOLS, LETTERS, SUGGESTION }
 
 /**
  * Une touche. [width] en unités (1 = une touche de lettre). [popup] : lettres

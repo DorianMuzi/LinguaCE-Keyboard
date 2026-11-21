@@ -38,7 +38,27 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         fun onGlobeLongPress()
         fun onSymbols()
         fun onLetters()
+        fun onSuggestion(word: String)
     }
+
+    /** Mots proposés dans la bande du haut (3 au plus). */
+    var suggestions: List<String> = emptyList()
+        set(value) {
+            if (field == value) return
+            field = value
+            place()
+            invalidate()
+            announceChange()
+        }
+
+    /** Bande de suggestions affichée (pas dans les champs de mot de passe). */
+    var showStrip: Boolean = true
+        set(value) {
+            if (field == value) return
+            field = value
+            requestLayout()
+            invalidate()
+        }
 
     var layout: Layout = Layouts.LATIN
         set(value) {
@@ -71,6 +91,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         if (layout.rows.size >= 5) compactRowHeight else rowHeight
     private val gap = 5 * density
     private val radius = 7 * density
+    private val stripHeight = 40 * density
+    private val stripSpace: Float get() = if (showStrip) stripHeight else 0f
 
     private val dark =
         (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
@@ -138,7 +160,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
         val rows = layout.rows.indices.sumOf { rowHeightOf(it).toDouble() }.toFloat()
-        val h = (rows + gap + bottomMargin).toInt() + bottomInset
+        val h = (stripSpace + rows + gap + bottomMargin).toInt() + bottomInset
         setMeasuredDimension(w, h)
     }
 
@@ -152,7 +174,17 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private fun place() {
         val unit = (width - gap) / layout.units
         val out = mutableListOf<Placed>()
-        var top = gap
+        // Bande de suggestions : trois cases égales sur toute la largeur.
+        if (showStrip && suggestions.isNotEmpty()) {
+            val w = width.toFloat() / 3
+            suggestions.take(3).forEachIndexed { i, word ->
+                out += Placed(
+                    Key(word, KeyType.SUGGESTION),
+                    RectF(i * w + gap, gap, (i + 1) * w - gap, stripHeight),
+                )
+            }
+        }
+        var top = gap + stripSpace
         layout.rows.forEachIndexed { r, row ->
             val rowUnits = row.sumOf { it.width.toDouble() }.toFloat()
             var x = gap / 2 + (layout.units - rowUnits) * unit / 2
@@ -176,8 +208,27 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     private fun isSpecial(k: Key) = k.type != KeyType.CHAR && k.type != KeyType.SPACE
 
+    private fun drawSuggestion(canvas: Canvas, p: Placed) {
+        if (p == pressed) {
+            fill.color = pressedColor
+            canvas.drawRoundRect(p.rect, radius, radius, fill)
+        }
+        text.color = textColor
+        text.textSize = 17 * density
+        var label = p.key.label
+        // Mot trop long pour sa case : on le coupe avec « … ».
+        val max = p.rect.width() - 8 * density
+        if (text.measureText(label) > max) {
+            while (label.length > 1 && text.measureText("$label…") > max) label = label.dropLast(1)
+            label = "$label…"
+        }
+        val y = p.rect.centerY() - (text.descent() + text.ascent()) / 2
+        canvas.drawText(label, p.rect.centerX(), y, text)
+    }
+
     private fun drawKey(canvas: Canvas, p: Placed) {
         val k = p.key
+        if (k.type == KeyType.SUGGESTION) return drawSuggestion(canvas, p)
         fill.color = when {
             p == pressed && popupKey == null -> pressedColor
             k.type == KeyType.SHIFT && shift != ShiftState.OFF -> accent
@@ -237,9 +288,17 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     }
 
     // ─── Toucher ────────────────────────────────────────────────
-    private fun keyAt(x: Float, y: Float): Placed? =
-        placed.firstOrNull { it.rect.contains(x, y) }
-            ?: placed.minByOrNull { (it.rect.centerX() - x).let { d -> d * d } + (it.rect.centerY() - y).let { d -> d * d } }
+    /**
+     * Touche sous le doigt ; entre deux touches, la plus proche. Dans la bande
+     * de suggestions, seulement un mot réellement touché (un appui à côté ne
+     * doit pas taper la lettre la plus proche).
+     */
+    private fun keyAt(x: Float, y: Float): Placed? {
+        placed.firstOrNull { it.rect.contains(x, y) }?.let { return it }
+        if (y < gap + stripSpace) return null
+        return placed.filter { it.key.type != KeyType.SUGGESTION }
+            .minByOrNull { (it.rect.centerX() - x).let { d -> d * d } + (it.rect.centerY() - y).let { d -> d * d } }
+    }
 
     private val longPress = Runnable {
         val p = pressed ?: return@Runnable
@@ -338,6 +397,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         KeyType.GLOBE -> listener.onGlobe()
         KeyType.SYMBOLS -> listener.onSymbols()
         KeyType.LETTERS -> listener.onLetters()
+        KeyType.SUGGESTION -> listener.onSuggestion(k.label)
     }
 
     override fun onDetachedFromWindow() {
@@ -381,6 +441,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             KeyType.GLOBE -> context.getString(R.string.key_globe)
             KeyType.SYMBOLS -> context.getString(R.string.key_symbols)
             KeyType.LETTERS -> context.getString(R.string.key_letters)
+            KeyType.SUGGESTION -> context.getString(R.string.key_suggestion, k.label)
         }
     }
 

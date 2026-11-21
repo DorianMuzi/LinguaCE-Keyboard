@@ -1,0 +1,139 @@
+# LinguaCE Keyboard — liste de base des suggestions (PUBLIQUE).
+# Mots courants validés par l'auteur, en latin et en cyrillique.
+# Format : mot<TAB>poids (plus le poids est grand, plus le mot passe devant).
+# Les mots que l'utilisateur tape s'y ajoutent, sur son téléphone seulement.
+# BROUILLON — en attente de l'accord de l'auteur avant publication.
+
+# Politesse et salutations
+salam	60
+barkalla	60
+dika	50
+voŋ	30
+duqa	40
+k̇ezig	30
+jüyre	40
+süyre	40
+haə	50
+noxçiyŋ	50
+mott	40
+ẋaŋ	40
+ċe	40
+
+# Nombres
+cẋaə	30
+şiə	30
+qoə	30
+pxiə	30
+
+# Famille et personnes
+da	40
+nana	40
+vaşa	30
+yişa	30
+k̇ant	30
+yoj	30
+stag	30
+zuda	30
+nax	30
+
+# Questions
+huŋ	40
+mila	40
+muxa	40
+miçaẋ	30
+miça	30
+
+# Temps et jours
+taxana	40
+qana	40
+selxana	40
+hinca	40
+lama	20
+stomara	20
+süyrenna	20
+busa	20
+de	30
+büysa	30
+k̇ira	20
+butt	20
+şo	20
+saẋt	20
+minot	20
+orşot	20
+şinara	20
+qaara	20
+yeara	20
+ṗeraska	20
+şot	20
+k̇irande	20
+
+# Mots du jour
+ċa	30
+dog	20
+korta	20
+küg	20
+lam	20
+borz	20
+ärzu	20
+
+# Cyrillique
+салам	60
+баркалла	60
+дика	50
+вон	30
+дукха	40
+кӀезиг	30
+Ӏуьйре	40
+суьйре	40
+хӀаъ	50
+нохчийн	50
+мотт	40
+хьан	40
+цӀе	40
+цхьаъ	30
+шиъ	30
+кхоъ	30
+пхиъ	30
+да	40
+нана	40
+ваша	30
+йиша	30
+кӀант	30
+йоӀ	30
+стаг	30
+зуда	30
+нах	30
+хӀун	40
+мила	40
+муха	40
+мичахь	30
+мича	30
+тахана	40
+кхана	40
+селхана	40
+хӀинца	40
+лама	20
+стомара	20
+суьйренна	20
+буса	20
+де	30
+буьйса	30
+кӀира	20
+бутт	20
+шо	20
+сахьт	20
+минот	20
+оршот	20
+шинара	20
+кхаара	20
+еара	20
+пӀераска	20
+шот	20
+кӀиранде	20
+цӀа	30
+дог	20
+корта	20
+куьг	20
+лам	20
+борз	20
+аьрзу	20

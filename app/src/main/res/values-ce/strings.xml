@@ -24,4 +24,10 @@
     <string name="key_letters">Elpaş</string>
     <string name="key_palochka">Paloçka Ӏ</string>
     <string name="key_type_letter">%1$s yazde</string>
+
+    <!-- Suggestions de mots : À VALIDER par l'auteur (rédigé en cyrillique, Dico3). -->
+    <string name="key_suggestion">Ẋexam: %1$s</string>
+    <string name="setup_learning">Ẋexamaş: aẋ yazdina deşnaş qu telefoneẋ beŋ ca düsu, yuxa ẋaxo. Üş cẋanẋa a dja ca doxüytu.</string>
+    <string name="setup_clear">Jamiyna deşnaş djadakqa (%1$d)</string>
+    <string name="setup_cleared">Jamiyna deşnaş djadäxna.</string>
 </resources>

@@ -70,7 +70,25 @@ class SetupActivity : Activity() {
             setHint(R.string.setup_try)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
         }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(16) })
-        column.addView(text(R.string.setup_privacy, 14f).apply { setPadding(0, dp(24), 0, 0) })
+        column.addView(text(R.string.setup_privacy, 14f).apply { setPadding(0, dp(24), 0, dp(8)) })
+
+        // Suggestions : les mots appris restent sur le téléphone, effaçables ici.
+        column.addView(text(R.string.setup_learning, 14f))
+        column.addView(Button(this).apply {
+            fun refresh() {
+                val n = LinguaImeService.learnedCount(this@SetupActivity)
+                text = getString(R.string.setup_clear, n)
+                isEnabled = n > 0
+            }
+            refresh()
+            setOnClickListener {
+                LinguaImeService.clearLearned(this@SetupActivity)
+                refresh()
+                android.widget.Toast.makeText(
+                    this@SetupActivity, R.string.setup_cleared, android.widget.Toast.LENGTH_SHORT,
+                ).show()
+            }
+        })
 
         val scroll = ScrollView(this).apply {
             addView(column)

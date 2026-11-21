@@ -18,4 +18,8 @@
     <string name="key_palochka">Палочка Ӏ</string>
     <string name="key_type_letter">Ввести %1$s</string>
     <string name="setup_privacy">У этой клавиатуры нет доступа к интернету: то, что вы печатаете, никогда не покидает телефон.</string>
+    <string name="key_suggestion">Подсказка: %1$s</string>
+    <string name="setup_learning">Подсказки: слова, которые вы печатаете, запоминаются только на этом телефоне, чтобы предлагать их снова. Они никуда не отправляются.</string>
+    <string name="setup_clear">Стереть выученные слова (%1$d)</string>
+    <string name="setup_cleared">Выученные слова стёрты.</string>
 </resources>

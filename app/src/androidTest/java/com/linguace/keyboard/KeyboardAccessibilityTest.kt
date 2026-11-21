@@ -31,6 +31,7 @@ class KeyboardAccessibilityTest {
         override fun onGlobeLongPress() {}
         override fun onSymbols() { typed += "123" }
         override fun onLetters() {}
+        override fun onSuggestion(word: String) { typed += "[$word]" }
     }
 
     private fun onMain(block: () -> Unit) =
@@ -116,6 +117,24 @@ class KeyboardAccessibilityTest {
         assertNotNull(n[desc(R.string.key_shift_locked)])
         assertNotNull(n["Ẋ"])
         assertNotNull(n["Ç̇"])
+    }
+
+    @Test
+    fun suggestions_areNamedNodes_andTapping_sendsTheWord() {
+        onMain { view.suggestions = listOf("noxçiyŋ", "ç̇ara") }
+        val n = nodes()
+        val label = desc(R.string.key_suggestion).replace("%1\$s", "noxçiyŋ")
+        val (id, node) = n[label]!!
+        assertTrue(node.isClickable)
+        onMain { provider.performAction(id, AccessibilityNodeInfo.ACTION_CLICK, null) }
+        assertEquals(listOf("[noxçiyŋ]"), typed)
+    }
+
+    @Test
+    fun noStrip_inPasswordFields() {
+        onMain { view.showStrip = false; view.suggestions = listOf("noxçiyŋ") }
+        val label = desc(R.string.key_suggestion).replace("%1\$s", "noxçiyŋ")
+        assertTrue(nodes()[label] == null)
     }
 
     private fun AccessibilityNodeInfo.boundsInScreenNonEmpty(): Boolean {
