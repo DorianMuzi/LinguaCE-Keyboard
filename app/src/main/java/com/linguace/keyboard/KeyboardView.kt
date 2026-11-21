@@ -262,16 +262,22 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         // Touche avec lettre d'appui long : la lettre principale descend un peu
         // et l'indice se loge dans le coin, pour que les majuscules (plus
         // hautes, Q̇ Ṫ Ə…) ne touchent pas l'indice (retour de l'auteur).
+        // Seulement en latin (touches plus basses, 42 dp) : le cyrillique garde
+        // le rendu que l'auteur avait validé.
         val hasHint = k.popup.isNotEmpty()
+        val latin = layout.id == Layouts.LATIN.id
         // Toutes les lettres descendent d'autant : elles restent alignées.
-        val drop = if (k.type == KeyType.CHAR) 2.5f * density else 0f
+        val drop = if (latin && k.type == KeyType.CHAR) 2.5f * density else 0f
         val y = p.rect.centerY() - (text.descent() + text.ascent()) / 2 + drop
         canvas.drawText(label, p.rect.centerX(), y, text)
 
         if (hasHint) {
+            hint.textSize = (if (latin) 9f else 10f) * density
             canvas.drawText(
                 k.popup.first().let { if (shifted) Alphabet.upper(it) else it },
-                p.rect.right - 2.5f * density, p.rect.top + 10.5f * density, hint,
+                p.rect.right - (if (latin) 2.5f else 4f) * density,
+                p.rect.top + (if (latin) 10.5f else 12f) * density,
+                hint,
             )
         }
     }
