@@ -36,15 +36,18 @@ object Layouts {
 
     /**
      * Latin tchétchène (choix de l'auteur, 2026-11-21) : QWERTY, w remplacé
-     * par ə (w n'existe pas en Muziŋ Dar), plus une rangée des 10 lettres
-     * les plus fréquentes. Les autres par appui long sur leur lettre de base.
+     * par ə (w n'existe pas en Muziŋ Dar ; il reste accessible par appui long
+     * sur ə pour les mots étrangers), plus une rangée des 10 lettres les plus
+     * fréquentes. Les autres par appui long sur leur lettre de base.
      */
     val LATIN = Layout(
         "latin",
         listOf(
             row("ä ç ç$DOT ġ ŋ q$DOT ş ṫ ẋ ƶ"),
             listOf(
-                k("q", "q$DOT"), k("ə"), k("e", "ə"), k("r"), k("t", "ṫ"),
+                // w (hors alphabet) par appui long sur ə, à sa place QWERTY :
+                // mots d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
+                k("q", "q$DOT"), k("ə", "w"), k("e", "ə"), k("r"), k("t", "ṫ"),
                 k("y"), k("u", "ü"), k("i"), k("o", "ö"), k("p", "ṗ"),
             ),
             listOf(

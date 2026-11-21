@@ -31,7 +31,9 @@ fréquentes ; **w**, absent de l'alphabet, est remplacé par **ə** :
 ```
 
 Appui long : c → ċ ç ç̇, k → k̇, p → ṗ, o → ö, u → ü, et chaque lettre de
-base donne sa variante (a → ä, s → ş, x → ẋ…).
+base donne sa variante (a → ä, s → ş, x → ẋ…). **ə → w** : w ne fait pas
+partie de l'alphabet tchétchène, mais reste disponible pour les mots
+d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
 
 **Cyrillique** — ЙЦУКЕН, touche **Ӏ** (U+04C0) dans la rangée du bas ;
 ъ par appui long sur ь, ё sur е.

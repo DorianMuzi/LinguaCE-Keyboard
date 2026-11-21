@@ -22,10 +22,21 @@ class LayoutsTest {
     }
 
     @Test
-    fun latin_reachesEveryLetter_andNoW() {
+    fun latin_reachesEveryLetter() {
         val typeable = Layouts.LATIN.typeable
         for (l in Alphabet.LETTERS) assertTrue("$l inaccessible", l in typeable)
-        assertFalse("w" in typeable)
+    }
+
+    @Test
+    fun w_isOutsideTheAlphabet_butTypeableForForeignWords() {
+        assertFalse("w" in Alphabet.LETTERS)
+        // Pas de touche w : appui long sur ə, à la place de w en QWERTY.
+        val keys = Layouts.LATIN.rows.flatten()
+        assertFalse(keys.any { it.label == "w" })
+        val schwa = Layouts.LATIN.rows[1][1]
+        assertEquals("ə", schwa.label)
+        assertEquals(listOf("w"), schwa.popup)
+        assertEquals("W", Key("w").output(true))
     }
 
     @Test
