@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Tchétchène (ce), alphabet latin. Rédigé en cyrillique, translittéré avec
-  Dico3. Validé par l'auteur le 2026-11-21 (lataye, xarƶa, Yuq̇, Kerla moġa),
-  sauf la dernière phrase de setup_intro (forme verbale à confirmer).
+  Dico3. Entièrement validé par l'auteur le 2026-11-21 (dont lataye, xarƶa,
+  Yuq̇, Kerla moġa et ṫetajiyça).
 -->
 <resources>
     <string name="ime_name">LinguaCE — noxçiyŋ</string>
