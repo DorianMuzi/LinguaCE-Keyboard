@@ -7,5 +7,15 @@
     <string name="setup_enable">1. Включить LinguaCE Keyboard</string>
     <string name="setup_choose">2. Выбрать LinguaCE Keyboard</string>
     <string name="setup_try">Попробуйте здесь…</string>
+    <string name="key_shift">Заглавная</string>
+    <string name="key_shift_locked">Заглавные закреплены</string>
+    <string name="key_delete">Удалить</string>
+    <string name="key_enter">Ввод</string>
+    <string name="key_space">Пробел</string>
+    <string name="key_globe">Латиница / кириллица</string>
+    <string name="key_symbols">Символы</string>
+    <string name="key_letters">Буквы</string>
+    <string name="key_palochka">Палочка Ӏ</string>
+    <string name="key_type_letter">Ввести %1$s</string>
     <string name="setup_privacy">У этой клавиатуры нет доступа к интернету: то, что вы печатаете, никогда не покидает телефон.</string>
 </resources>

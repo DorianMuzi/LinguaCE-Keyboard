@@ -41,6 +41,14 @@ d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
 **🌐** passe du latin au cyrillique ; un appui long sur 🌐 ouvre le choix du
 clavier système. **⇧** : une majuscule ; deux appuis : verrouillage.
 
+## Accessibilité
+
+Le clavier fonctionne avec **TalkBack** : chaque touche a un nom lu dans la
+langue du téléphone (« Effacer », « Majuscule », « Palotchka Ӏ »…). On glisse
+le doigt pour entendre les touches ; la lettre est tapée quand on le lève (ou
+par double appui). Les lettres de l'appui long sont proposées comme actions
+TalkBack sur leur touche (« Taper ċ », « Taper w »…).
+
 ## Encodage
 
 Les lettres suivent la spécification de l'alphabet du LinguaCE Core, comme
@@ -57,6 +65,15 @@ gradlew test assembleDebug
 ```
 
 L'APK se trouve dans `app/build/outputs/apk/debug/`.
+
+Tests d'accessibilité, sur un appareil ou un émulateur branché :
+
+```
+gradlew assembleDebug assembleDebugAndroidTest
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell am instrument -w com.linguace.keyboard.test/androidx.test.runner.AndroidJUnitRunner
+```
 
 ## Licence
 

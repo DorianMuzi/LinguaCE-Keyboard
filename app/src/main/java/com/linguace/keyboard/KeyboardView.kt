@@ -11,8 +11,14 @@ import android.os.Handler
 import android.os.Looper
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityManager
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityNodeProvider
+import android.widget.Button
 
 enum class ShiftState { OFF, ONCE, LOCKED }
 
@@ -39,12 +45,15 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             field = value
             requestLayout()
             invalidate()
+            announceChange()
         }
 
     var shift: ShiftState = ShiftState.OFF
         set(value) {
+            if (field == value) return
             field = value
             invalidate()
+            announceChange()
         }
 
     private val density = resources.displayMetrics.density
@@ -310,5 +319,174 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     override fun onDetachedFromWindow() {
         handler.removeCallbacksAndMessages(null)
         super.onDetachedFromWindow()
+    }
+
+    // ─── Accessibilité (TalkBack) ───────────────────────────────
+    //
+    // Le clavier est dessiné, pas fait de vues : chaque touche est donc
+    // déclarée à Android comme une « vue virtuelle » (nom, position, actions).
+    // Exploration au toucher : TalkBack lit la touche sous le doigt, la lettre
+    // est tapée quand on lève le doigt. Les lettres de l'appui long deviennent
+    // des actions TalkBack (« Taper ċ »…) sur leur touche.
+
+    private val a11yManager =
+        context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+    private val provider = KeyNodes()
+    private var hovered = -1
+    private var a11yFocused = -1
+
+    private val altActionIds =
+        intArrayOf(R.id.a11y_alt_0, R.id.a11y_alt_1, R.id.a11y_alt_2, R.id.a11y_alt_3)
+
+    override fun getAccessibilityNodeProvider(): AccessibilityNodeProvider = provider
+
+    /** Nom de la touche lu par TalkBack, dans la langue du téléphone. */
+    internal fun describe(k: Key): String {
+        val shifted = shift != ShiftState.OFF
+        return when (k.type) {
+            KeyType.CHAR -> when {
+                k.label == "Ӏ" -> context.getString(R.string.key_palochka)
+                else -> k.output(shifted)
+            }
+            KeyType.SHIFT -> context.getString(
+                if (shift == ShiftState.LOCKED) R.string.key_shift_locked else R.string.key_shift,
+            )
+            KeyType.DELETE -> context.getString(R.string.key_delete)
+            KeyType.ENTER -> context.getString(R.string.key_enter)
+            KeyType.SPACE -> context.getString(R.string.key_space)
+            KeyType.GLOBE -> context.getString(R.string.key_globe)
+            KeyType.SYMBOLS -> context.getString(R.string.key_symbols)
+            KeyType.LETTERS -> context.getString(R.string.key_letters)
+        }
+    }
+
+    private fun altOutput(letter: String) =
+        if (shift != ShiftState.OFF) Alphabet.upper(letter) else letter
+
+    override fun onHoverEvent(e: MotionEvent): Boolean {
+        if (!a11yManager.isTouchExplorationEnabled) return super.onHoverEvent(e)
+        val i = placed.indexOfFirst { it.rect.contains(e.x, e.y) }
+        when (e.actionMasked) {
+            MotionEvent.ACTION_HOVER_ENTER, MotionEvent.ACTION_HOVER_MOVE -> {
+                if (i != hovered) {
+                    if (hovered >= 0) sendKeyEvent(hovered, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT)
+                    hovered = i
+                    if (i >= 0) sendKeyEvent(i, AccessibilityEvent.TYPE_VIEW_HOVER_ENTER)
+                }
+            }
+            MotionEvent.ACTION_HOVER_EXIT -> {
+                // Doigt levé sur une touche : on la tape.
+                if (hovered >= 0 && hovered == i) fire(placed[i].key)
+                if (hovered >= 0) sendKeyEvent(hovered, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT)
+                hovered = -1
+            }
+        }
+        return true
+    }
+
+    /** À appeler quand la disposition ou ⇧ change : TalkBack relit l'arbre. */
+    internal fun announceChange() {
+        if (!a11yManager.isEnabled) return
+        @Suppress("DEPRECATION")
+        val event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)
+        event.packageName = context.packageName
+        event.setSource(this)
+        parent?.requestSendAccessibilityEvent(this, event)
+    }
+
+    private fun sendKeyEvent(i: Int, type: Int) {
+        if (!a11yManager.isEnabled || i !in placed.indices) return
+        @Suppress("DEPRECATION")
+        val event = AccessibilityEvent.obtain(type)
+        event.packageName = context.packageName
+        event.className = Button::class.java.name
+        event.contentDescription = describe(placed[i].key)
+        event.setSource(this, i)
+        event.isEnabled = true
+        parent?.requestSendAccessibilityEvent(this, event)
+    }
+
+    private inner class KeyNodes : AccessibilityNodeProvider() {
+
+        @Suppress("DEPRECATION")
+        override fun createAccessibilityNodeInfo(virtualViewId: Int): AccessibilityNodeInfo? {
+            if (virtualViewId == HOST_VIEW_ID) {
+                val info = AccessibilityNodeInfo.obtain(this@KeyboardView)
+                onInitializeAccessibilityNodeInfo(info)
+                placed.indices.forEach { info.addChild(this@KeyboardView, it) }
+                return info
+            }
+            val p = placed.getOrNull(virtualViewId) ?: return null
+            val info = AccessibilityNodeInfo.obtain(this@KeyboardView, virtualViewId)
+            info.packageName = context.packageName
+            info.className = Button::class.java.name
+            info.setParent(this@KeyboardView)
+            info.contentDescription = describe(p.key)
+            info.isEnabled = true
+            info.isClickable = true
+            info.isFocusable = true
+            info.isVisibleToUser = true
+            info.isAccessibilityFocused = virtualViewId == a11yFocused
+
+            val r = android.graphics.Rect()
+            p.rect.round(r)
+            info.setBoundsInParent(r)
+            val loc = IntArray(2)
+            getLocationOnScreen(loc)
+            r.offset(loc[0], loc[1])
+            info.setBoundsInScreen(r)
+
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)
+            info.addAction(
+                if (virtualViewId == a11yFocused) {
+                    AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS
+                } else {
+                    AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS
+                },
+            )
+            p.key.popup.take(altActionIds.size).forEachIndexed { n, letter ->
+                info.addAction(
+                    AccessibilityNodeInfo.AccessibilityAction(
+                        altActionIds[n],
+                        context.getString(R.string.key_type_letter, altOutput(letter)),
+                    ),
+                )
+            }
+            return info
+        }
+
+        override fun performAction(virtualViewId: Int, action: Int, arguments: Bundle?): Boolean {
+            if (virtualViewId == HOST_VIEW_ID) {
+                return this@KeyboardView.performAccessibilityAction(action, arguments)
+            }
+            val p = placed.getOrNull(virtualViewId) ?: return false
+            when (action) {
+                AccessibilityNodeInfo.ACTION_CLICK -> {
+                    fire(p.key)
+                    sendKeyEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED)
+                    return true
+                }
+                AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS -> {
+                    if (a11yFocused == virtualViewId) return false
+                    a11yFocused = virtualViewId
+                    sendKeyEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED)
+                    invalidate()
+                    return true
+                }
+                AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS -> {
+                    if (a11yFocused != virtualViewId) return false
+                    a11yFocused = -1
+                    sendKeyEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED)
+                    invalidate()
+                    return true
+                }
+            }
+            val n = altActionIds.indexOf(action)
+            if (n >= 0 && n < p.key.popup.size) {
+                listener.onText(altOutput(p.key.popup[n]))
+                return true
+            }
+            return false
+        }
     }
 }

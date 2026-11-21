@@ -8,5 +8,16 @@
     <string name="setup_enable">1. Enable LinguaCE Keyboard</string>
     <string name="setup_choose">2. Choose LinguaCE Keyboard</string>
     <string name="setup_try">Try it here…</string>
+    <!-- Noms des touches lus par TalkBack. -->
+    <string name="key_shift">Shift</string>
+    <string name="key_shift_locked">Caps lock on</string>
+    <string name="key_delete">Delete</string>
+    <string name="key_enter">Enter</string>
+    <string name="key_space">Space</string>
+    <string name="key_globe">Switch Latin / Cyrillic</string>
+    <string name="key_symbols">Symbols</string>
+    <string name="key_letters">Letters</string>
+    <string name="key_palochka">Palochka Ӏ</string>
+    <string name="key_type_letter">Type %1$s</string>
     <string name="setup_privacy">This keyboard has no internet access: what you type never leaves your phone.</string>
 </resources>

@@ -7,5 +7,15 @@
     <string name="setup_enable">1. Activer LinguaCE Keyboard</string>
     <string name="setup_choose">2. Choisir LinguaCE Keyboard</string>
     <string name="setup_try">Essaie ici…</string>
+    <string name="key_shift">Majuscule</string>
+    <string name="key_shift_locked">Majuscules verrouillées</string>
+    <string name="key_delete">Effacer</string>
+    <string name="key_enter">Entrée</string>
+    <string name="key_space">Espace</string>
+    <string name="key_globe">Basculer latin / cyrillique</string>
+    <string name="key_symbols">Symboles</string>
+    <string name="key_letters">Lettres</string>
+    <string name="key_palochka">Palotchka Ӏ</string>
+    <string name="key_type_letter">Taper %1$s</string>
     <string name="setup_privacy">Ce clavier n\'a pas accès à Internet : ce que tu tapes ne quitte jamais ton téléphone.</string>
 </resources>

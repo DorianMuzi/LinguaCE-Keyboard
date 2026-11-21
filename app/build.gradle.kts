@@ -13,6 +13,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -32,7 +33,10 @@ android {
 }
 
 // Aucune dépendance d'exécution : le clavier ne contient que son propre code,
-// lisible ligne à ligne. JUnit ne sert qu'aux tests sur le poste.
+// lisible ligne à ligne. Les bibliothèques ci-dessous ne servent qu'aux tests
+// (sur le poste et sur l'émulateur) et n'entrent pas dans l'APK.
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
 }
