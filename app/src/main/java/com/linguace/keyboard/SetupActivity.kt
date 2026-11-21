@@ -17,6 +17,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.view.View
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
@@ -71,8 +74,28 @@ class SetupActivity : Activity() {
             setHint(R.string.setup_try)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
         }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(16) })
-        // Son et vibration à chaque touche (comme les options de Gboard).
+        // Disposition latine : QWERTY ou AZERTY (comme dans Gboard).
         val prefs = getSharedPreferences("keyboard", Context.MODE_PRIVATE)
+        column.addView(text(R.string.set_latin_layout, 16f).apply { setPadding(0, dp(16), 0, dp(4)) })
+        column.addView(RadioGroup(this).apply {
+            orientation = RadioGroup.HORIZONTAL
+            val azerty = LinguaImeService.isAzerty(this@SetupActivity)
+            for ((label, value) in listOf("QWERTY" to "qwerty", "AZERTY" to "azerty")) {
+                addView(RadioButton(this@SetupActivity).apply {
+                    id = View.generateViewId()
+                    text = label
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                    minHeight = dp(48)
+                    setPadding(dp(4), 0, dp(24), 0)
+                    isChecked = (value == "azerty") == azerty
+                    setOnCheckedChangeListener { _, on ->
+                        if (on) prefs.edit().putString(LinguaImeService.LATIN_KEY, value).apply()
+                    }
+                })
+            }
+        })
+
+        // Son et vibration à chaque touche (comme les options de Gboard).
         fun toggle(label: Int, key: String, default: Boolean) = Switch(this).apply {
             setText(label)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)

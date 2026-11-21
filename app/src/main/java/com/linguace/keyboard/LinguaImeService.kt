@@ -33,7 +33,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
 
     override fun onCreate() {
         super.onCreate()
-        letters = Layouts.byId(prefs.getString("layout", null))
+        letters = Layouts.byId(prefs.getString("layout", null), isAzerty(this))
         val seed = runCatching {
             assets.open(SEED_FILE).bufferedReader().use { it.readText() }
         }.getOrDefault("")
@@ -75,6 +75,8 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         // Mots effacés depuis l'écran d'installation : on repart de zéro.
         if (prefs.getInt(EPOCH_KEY, 0) != wordsEpoch) loadLearned()
         configureField(info)
+        // QWERTY / AZERTY a pu changer dans les réglages entre-temps.
+        if (letters.isLatin) letters = Layouts.latin(isAzerty(this))
         view?.layout = letters
         view?.shift = ShiftState.OFF
         view?.showStrip = suggest
@@ -199,8 +201,8 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onGlobe() {
-        letters = if (letters.id == Layouts.LATIN.id) Layouts.CYRILLIC else Layouts.LATIN
-        prefs.edit().putString("layout", letters.id).apply()
+        letters = if (letters.isLatin) Layouts.CYRILLIC else Layouts.latin(isAzerty(this))
+        prefs.edit().putString("layout", if (letters.isLatin) "latin" else letters.id).apply()
         view?.layout = letters
     }
 
@@ -281,6 +283,21 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         const val LEARNED_FILE = "learned_words.tsv"
         const val EPOCH_KEY = "words_epoch"
         const val SOUND_KEY = "sound"
+        const val LATIN_KEY = "latin_layout"
+
+        /**
+         * Latin en AZERTY ? Choix fait dans les réglages ; à défaut, AZERTY si
+         * le téléphone est en français (France, Belgique…), sinon QWERTY.
+         */
+        fun isAzerty(context: Context): Boolean {
+            val saved = context.getSharedPreferences("keyboard", Context.MODE_PRIVATE)
+                .getString(LATIN_KEY, null)
+            return when (saved) {
+                "azerty" -> true
+                "qwerty" -> false
+                else -> context.resources.configuration.locales[0].language == "fr"
+            }
+        }
         const val VIBRATE_KEY = "vibrate"
         private const val MAX_WORD = 48
 

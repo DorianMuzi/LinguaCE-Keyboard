@@ -34,4 +34,5 @@
     <string name="share_intro">Here are Chechen words I use, suggested for the LinguaCE keyboard:</string>
     <string name="set_sound">Sound on each key</string>
     <string name="set_vibrate">Vibrate on each key</string>
+    <string name="set_latin_layout">Latin layout</string>
 </resources>

@@ -30,4 +30,5 @@
     <string name="share_intro">Вот чеченские слова, которые я использую, — предложение для клавиатуры LinguaCE:</string>
     <string name="set_sound">Звук при нажатии</string>
     <string name="set_vibrate">Вибрация при нажатии</string>
+    <string name="set_latin_layout">Латинская раскладка</string>
 </resources>

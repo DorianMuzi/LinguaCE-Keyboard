@@ -31,4 +31,5 @@
     <string name="share_intro">Voici des mots tchétchènes que j\'utilise, proposés pour le clavier LinguaCE :</string>
     <string name="set_sound">Son à chaque touche</string>
     <string name="set_vibrate">Vibration à chaque touche</string>
+    <string name="set_latin_layout">Disposition latine</string>
 </resources>

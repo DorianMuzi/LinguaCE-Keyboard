@@ -57,8 +57,36 @@ class LayoutsTest {
         assertEquals(listOf("ş"), popups["s"])
         assertEquals(listOf("ŋ"), popups["n"])
         assertEquals(listOf("ġ"), popups["g"])
-        assertEquals(listOf("q$DOT"), popups["q"])
+        // Rangée du haut : la lettre dérivée d'abord, puis le chiffre.
+        assertEquals(listOf("q$DOT", "1"), popups["q"])
         assertEquals(listOf("ä"), popups["a"])
+    }
+
+    @Test
+    fun topRow_givesDigits1to0_inEveryLayout() {
+        for (layout in listOf(Layouts.LATIN, Layouts.LATIN_AZERTY, Layouts.CYRILLIC)) {
+            val digits = layout.rows.first().take(10).map { it.digit }
+            assertEquals(layout.id, listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"), digits)
+        }
+        // Variante et chiffre sur la même touche : t → ṫ puis 5.
+        val t = Layouts.LATIN.rows.first().first { it.label == "t" }
+        assertEquals("ṫ", t.variant)
+        assertEquals("5", t.digit)
+        assertEquals(listOf("ṫ", "5"), t.popup)
+    }
+
+    @Test
+    fun azerty_isFrenchGboard_withChechenLetters() {
+        val l = Layouts.LATIN_AZERTY
+        assertTrue(l.isLatin)
+        fun row(i: Int) = l.rows[i].joinToString(" ") { it.label }
+        assertEquals("a z e r t y u i o p", row(0))
+        assertEquals("q s d f g h j k l m", row(1))
+        assertEquals("⇧ w x c v b n ç ə ⌫", row(2))
+        for (letter in Alphabet.LETTERS) assertTrue("$letter inaccessible", letter in l.typeable)
+        assertEquals(Layouts.LATIN_AZERTY, Layouts.byId("latin", azerty = true))
+        assertEquals(Layouts.LATIN, Layouts.byId("latin", azerty = false))
+        assertEquals(Layouts.CYRILLIC, Layouts.byId("cyrillic", azerty = true))
     }
 
     @Test

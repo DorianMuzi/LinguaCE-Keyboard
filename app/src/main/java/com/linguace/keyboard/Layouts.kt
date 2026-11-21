@@ -19,9 +19,18 @@ data class Key(
     /** Texte émis, selon l'état de la touche ⇧. */
     fun output(shifted: Boolean): String =
         if (shifted && !caseless) Alphabet.upper(label) else label
+
+    /** Chiffre de l'appui long (rangée du haut), affiché en haut à gauche. */
+    val digit: String? get() = popup.firstOrNull { it.length == 1 && it[0].isDigit() }
+
+    /** Lettre dérivée de l'appui long, affichée en haut à droite. */
+    val variant: String? get() = popup.firstOrNull { !(it.length == 1 && it[0].isDigit()) }
 }
 
 data class Layout(val id: String, val rows: List<List<Key>>) {
+    /** Disposition latine (QWERTY ou AZERTY). */
+    val isLatin: Boolean get() = id.startsWith("latin")
+
     /** Largeur de la rangée la plus large, en unités. */
     val units: Float get() = rows.maxOf { row -> row.sumOf { it.width.toDouble() }.toFloat() }
 
@@ -47,9 +56,11 @@ object Layouts {
             // 2026-11-21) : chaque variante est sur l'appui long de sa lettre
             // de base, ce qui garde un clavier de 4 rangées comme le cyrillique.
             // w à sa place QWERTY (mots étrangers : WhatsApp, Wi-Fi, Wagner…).
-            listOf(
-                k("q", "q$DOT"), k("w"), k("e"), k("r"), k("t", "ṫ"),
-                k("y"), k("u", "ü"), k("i"), k("o", "ö"), k("p", "ṗ"),
+            withDigits(
+                listOf(
+                    k("q", "q$DOT"), k("w"), k("e"), k("r"), k("t", "ṫ"),
+                    k("y"), k("u", "ü"), k("i"), k("o", "ö"), k("p", "ṗ"),
+                ),
             ),
             // ə a sa touche, à droite de l, comme sur le clavier azerbaïdjanais.
             listOf(
@@ -69,6 +80,36 @@ object Layouts {
     )
 
     /**
+     * Latin tchétchène en AZERTY (demande de l'auteur, 2026-11-22), sur le
+     * modèle de Gboard français : beaucoup de Tchétchènes de France et de
+     * Belgique ont l'habitude de l'AZERTY. ç et ə prennent la place de
+     * l'apostrophe et des accents français, en fin de troisième rangée.
+     */
+    val LATIN_AZERTY = Layout(
+        "latin_azerty",
+        listOf(
+            withDigits(
+                listOf(
+                    k("a", "ä"), k("z", "ƶ"), k("e"), k("r"), k("t", "ṫ"),
+                    k("y"), k("u", "ü"), k("i"), k("o", "ö"), k("p", "ṗ"),
+                ),
+            ),
+            listOf(
+                k("q", "q$DOT"), k("s", "ş"), k("d"), k("f"), k("g", "ġ"),
+                k("h"), k("j"), k("k", "k$DOT"), k("l"), k("m"),
+            ),
+            shiftRow(
+                10f,
+                listOf(
+                    k("w"), k("x", "ẋ"), k("c", "ċ"), k("v"),
+                    k("b"), k("n", "ŋ"), k("ç", "ç$DOT"), k("ə"),
+                ),
+            ),
+            bottom(Key("123", KeyType.SYMBOLS, 1.25f)),
+        ),
+    )
+
+    /**
      * Cyrillique tchétchène : ЙЦУКЕН, avec la touche Ӏ (palochka, U+04C0,
      * toujours en forme majuscule comme le veut l'usage tchétchène). ъ par
      * appui long sur ь, ё sur е.
@@ -76,9 +117,11 @@ object Layouts {
     val CYRILLIC = Layout(
         "cyrillic",
         listOf(
-            listOf(
-                k("й"), k("ц"), k("у"), k("к"), k("е", "ё"), k("н"), k("г"),
-                k("ш"), k("щ"), k("з"), k("х"),
+            withDigits(
+                listOf(
+                    k("й"), k("ц"), k("у"), k("к"), k("е", "ё"), k("н"), k("г"),
+                    k("ш"), k("щ"), k("з"), k("х"),
+                ),
             ),
             row("ф ы в а п р о л д ж э"),
             shiftRow(
@@ -121,10 +164,24 @@ object Layouts {
             Key("⌫", KeyType.DELETE, FUNCTION_KEY_WIDTH)
     }
 
+    /**
+     * Chiffres par appui long sur la rangée du haut, comme Gboard : 1 à 0 sur
+     * les dix premières touches, APRÈS la lettre dérivée éventuelle (t → ṫ, 5).
+     */
+    private fun withDigits(row: List<Key>): List<Key> =
+        row.mapIndexed { i, key ->
+            if (i < 10) key.copy(popup = key.popup + ((i + 1) % 10).toString()) else key
+        }
+
     private fun bottom(switch: Key) = listOf(
         Key("🌐", KeyType.GLOBE, 1.25f), switch, Key(","),
         Key(" ", KeyType.SPACE, 4f), Key("."), Key("↵", KeyType.ENTER, 1.5f),
     )
 
-    fun byId(id: String?): Layout = if (id == CYRILLIC.id) CYRILLIC else LATIN
+    /** Disposition latine choisie dans les réglages. */
+    fun latin(azerty: Boolean): Layout = if (azerty) LATIN_AZERTY else LATIN
+
+    /** « cyrillic » → cyrillique ; sinon le latin choisi. */
+    fun byId(id: String?, azerty: Boolean = false): Layout =
+        if (id == CYRILLIC.id) CYRILLIC else latin(azerty)
 }
