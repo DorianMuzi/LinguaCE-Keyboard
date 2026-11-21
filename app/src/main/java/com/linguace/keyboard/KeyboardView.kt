@@ -82,9 +82,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private val density = resources.displayMetrics.density
     /**
      * Hauteur des rangées, réglée sur le téléphone de l'auteur (2026-11-21) :
-     * 42 dp pour le latin, qui a 5 rangées (54 puis 48 dp étaient trop hauts) ;
-     * 48 dp pour le cyrillique et les symboles, qui n'en ont que 4 (42 dp les
-     * rendait trop petits, avec 11 touches par rangée en cyrillique).
+     * 48 dp pour les dispositions de 4 rangées (latin, cyrillique, symboles) ;
+     * 42 dp si une disposition en avait 5 (l'ancienne rangée tchétchène du
+     * latin : à 48 dp l'ensemble était trop haut).
      */
     private val compactRowHeight = 42 * density
     private val rowHeight = 48 * density

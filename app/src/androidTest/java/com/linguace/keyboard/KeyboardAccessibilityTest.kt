@@ -70,7 +70,7 @@ class KeyboardAccessibilityTest {
     fun everyLatinKey_isANamedClickableNode() {
         val n = nodes()
         assertEquals(Layouts.LATIN.rows.sumOf { it.size }, n.size)
-        for (name in listOf("ç̇", "q̇", "ẋ", "ə", desc(R.string.key_delete),
+        for (name in listOf("c", "q", "x", "ə", desc(R.string.key_delete),
             desc(R.string.key_shift), desc(R.string.key_globe), desc(R.string.key_space))) {
             val node = n[name]
             assertNotNull("touche « $name » absente", node)
@@ -81,9 +81,12 @@ class KeyboardAccessibilityTest {
 
     @Test
     fun doubleTap_typesTheKey() {
-        val (id, _) = nodes()["ẋ"]!!
+        val (id, _) = nodes()["x"]!!
         onMain { provider.performAction(id, AccessibilityNodeInfo.ACTION_CLICK, null) }
-        assertEquals(listOf("ẋ"), typed)
+        assertEquals(listOf("x"), typed)
+        // ẋ : action TalkBack de la touche x.
+        onMain { provider.performAction(id, R.id.a11y_alt_0, null) }
+        assertEquals(listOf("x", "ẋ"), typed)
     }
 
     @Test
@@ -115,8 +118,8 @@ class KeyboardAccessibilityTest {
         onMain { view.shift = ShiftState.LOCKED }
         val n = nodes()
         assertNotNull(n[desc(R.string.key_shift_locked)])
-        assertNotNull(n["Ẋ"])
-        assertNotNull(n["Ç̇"])
+        assertNotNull(n["X"])
+        assertNotNull(n["Q"])
     }
 
     @Test

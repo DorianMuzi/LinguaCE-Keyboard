@@ -33,28 +33,42 @@ class LayoutsTest {
         // Pas de touche w : appui long sur ə, à la place de w en QWERTY.
         val keys = Layouts.LATIN.rows.flatten()
         assertFalse(keys.any { it.label == "w" })
-        val schwa = Layouts.LATIN.rows[1][1]
+        val schwa = Layouts.LATIN.rows[0][1]
         assertEquals("ə", schwa.label)
         assertEquals(listOf("w"), schwa.popup)
         assertEquals("W", Key("w").output(true))
     }
 
     @Test
-    fun latin_topRowIsTheAuthorsChoice() {
+    fun latin_isFourRowsOfQwerty_withSchwaInsteadOfW() {
+        assertEquals(4, Layouts.LATIN.rows.size)
         assertEquals(
-            "ä ç ç$DOT ġ ŋ q$DOT ş ṫ ẋ ƶ",
+            "q ə e r t y u i o p",
             Layouts.LATIN.rows.first().joinToString(" ") { it.label },
         )
-        // ə à la place de w, juste après q.
-        assertEquals("ə", Layouts.LATIN.rows[1][1].label)
+        // Aucune touche à diacritique : toutes en appui long.
+        val keys = Layouts.LATIN.rows.flatten().filter { it.type == KeyType.CHAR }
+        assertFalse(keys.any { k -> k.label.any { it.code > 0x7F } && k.label != "ə" })
+    }
+
+    @Test
+    fun everyVariant_isOnItsBaseLetter() {
+        val popups = Layouts.LATIN.rows.flatten().associate { it.label to it.popup }
+        assertEquals(listOf("ċ", "ç", "ç$DOT"), popups["c"])
+        assertEquals(listOf("ẋ"), popups["x"])
+        assertEquals(listOf("ş"), popups["s"])
+        assertEquals(listOf("ŋ"), popups["n"])
+        assertEquals(listOf("ġ"), popups["g"])
+        assertEquals(listOf("q$DOT"), popups["q"])
+        assertEquals(listOf("ä"), popups["a"])
     }
 
     @Test
     fun combiningLetters_areEmittedAsLetterPlusDot() {
-        val key = Layouts.LATIN.rows.first().first { it.label.startsWith("ç") && it.label.length == 2 }
-        assertEquals("ç̇", key.output(false))
-        assertEquals("Ç̇", key.output(true))
-        assertEquals(2, key.output(true).length)
+        val cDot = Layouts.LATIN.rows.flatten().first { it.label == "c" }.popup.last()
+        assertEquals("ç̇", cDot)
+        assertEquals("Ç̇", Alphabet.upper(cDot))
+        assertEquals(2, Alphabet.upper(cDot).length)
     }
 
     @Test

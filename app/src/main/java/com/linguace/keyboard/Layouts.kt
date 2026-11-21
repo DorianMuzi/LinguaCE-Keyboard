@@ -37,14 +37,16 @@ object Layouts {
 
     /**
      * Latin tchétchène (choix de l'auteur, 2026-11-21) : QWERTY, w remplacé
-     * par ə (w n'existe pas dans l'alphabet tchétchène ; il reste accessible par appui long
-     * sur ə pour les mots étrangers), plus une rangée des 10 lettres les plus
-     * fréquentes. Les autres par appui long sur leur lettre de base.
+     * par ə (w n'existe pas dans l'alphabet tchétchène ; il reste accessible
+     * par appui long sur ə pour les mots étrangers). Les lettres à diacritique
+     * sont sur l'appui long de leur lettre de base (c → ċ ç ç̇, x → ẋ…).
      */
     val LATIN = Layout(
         "latin",
         listOf(
-            row("ä ç ç$DOT ġ ŋ q$DOT ş ṫ ẋ ƶ"),
+            // Plus de rangée de lettres tchétchènes (décision de l'auteur,
+            // 2026-11-21) : chaque variante est sur l'appui long de sa lettre
+            // de base, ce qui garde un clavier de 4 rangées comme le cyrillique.
             listOf(
                 // w (hors alphabet) par appui long sur ə, à sa place QWERTY :
                 // mots d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).

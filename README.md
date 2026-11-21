@@ -19,19 +19,19 @@ aapt2 dump permissions app-debug.apk
 
 ## Dispositions (v0.1)
 
-**Latin** — QWERTY, avec une rangée des lettres tchétchènes les plus
-fréquentes ; **w**, absent de l'alphabet, est remplacé par **ə** :
+**Latin** — QWERTY ; **w**, absent de l'alphabet, est remplacé par **ə**.
+Les lettres à diacritique sont sur l'appui long de leur lettre de base :
 
 ```
- ä  ç  ç̇  ġ  ŋ  q̇  ş  ṫ  ẋ  ƶ
  q  ə  e  r  t  y  u  i  o  p
   a  s  d  f  g  h  j  k  l
  ⇧   z  x  c  v  b  n  m   ⌫
  🌐 123  ,     espace     .  ↵
 ```
 
-Appui long : c → ċ ç ç̇, k → k̇, p → ṗ, o → ö, u → ü, et chaque lettre de
-base donne sa variante (a → ä, s → ş, x → ẋ…). **ə → w** : w ne fait pas
+Appui long : a → ä, c → ċ ç ç̇, e → ə, g → ġ, k → k̇, n → ŋ, o → ö,
+p → ṗ, q → q̇, s → ş, t → ṫ, u → ü, x → ẋ, z → ƶ. Les suggestions aident aussi :
+taper « noxciyn » propose « noxçiyŋ ». **ə → w** : w ne fait pas
 partie de l'alphabet tchétchène, mais reste disponible pour les mots
 d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
 
