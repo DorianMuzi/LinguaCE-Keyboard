@@ -1,6 +1,6 @@
 # LinguaCE Keyboard
 
-Clavier Android pour le **tchétchène** : alphabet latin **Muziŋ Dar** et
+Clavier Android pour le **tchétchène** : alphabet **latin tchétchène** et
 cyrillique avec la touche **Ӏ**. Un produit de l'écosystème
 [LinguaCE](https://github.com/DorianMuzi/LinguaCE).
 

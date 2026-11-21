@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tchétchène (ce), alphabet latin. Rédigé en cyrillique, translittéré avec
+  Dico3. À VALIDER par l'auteur.
+-->
+<resources>
+    <string name="ime_name">LinguaCE — noxçiyŋ</string>
+    <string name="subtype_ce">Noxçiyŋ (latinica · kirillica)</string>
+    <string name="setup_title">Noxçiyŋ klaviatura</string>
+    <string name="setup_intro">LinguaCE proektaŋ klaviatura: noxçiyŋ latinaŋ elpaş (ẋ, ç̇, q̇, ŋ…) a, Ӏ klavişa yolu kirillica a. 🌐 latinica a, kirillica a xiycado. Klavişa dexxa ṫetajiyça, qiŋ elpaş goytu.</string>
+    <string name="setup_enable">1. LinguaCE Keyboard latae</string>
+    <string name="setup_choose">2. LinguaCE Keyboard xarƶa</string>
+    <string name="setup_try">Quzaẋ yazde…</string>
+    <string name="setup_privacy">Qu klaviaturaŋ internete qaça yiş yac: aẋ yazdinarg ẋaŋ telefonera cq̇a a ara ca dolu.</string>
+
+    <string name="key_shift">Dokqa elp</string>
+    <string name="key_shift_locked">Dokqa elpaş ç̇aġdina</string>
+    <string name="key_delete">Djadakqa</string>
+    <string name="key_enter">Kerla moġa</string>
+    <string name="key_space">Yuq̇</string>
+    <string name="key_globe">Latinica / kirillica</string>
+    <string name="key_symbols">Simvolaş</string>
+    <string name="key_letters">Elpaş</string>
+    <string name="key_palochka">Paloçka Ӏ</string>
+    <string name="key_type_letter">%1$s yazde</string>
+</resources>

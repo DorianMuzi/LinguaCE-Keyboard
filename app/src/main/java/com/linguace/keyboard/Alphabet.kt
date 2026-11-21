@@ -3,7 +3,7 @@ package com.linguace.keyboard
 import java.util.Locale
 
 /**
- * L'alphabet latin tchétchène (Muziŋ Dar) : inventaire public des 41 lettres,
+ * L'alphabet latin tchétchène : inventaire public des 41 lettres,
  * dans l'ordre validé par l'auteur (spécification du LinguaCE Core, 0.1).
  * Identique à `lib/services/muzin_dar.dart` de LinguaCE App : les deux
  * produits émettent exactement les mêmes points de code.

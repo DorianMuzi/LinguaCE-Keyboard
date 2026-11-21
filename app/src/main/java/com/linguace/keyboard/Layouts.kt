@@ -36,7 +36,7 @@ object Layouts {
 
     /**
      * Latin tchétchène (choix de l'auteur, 2026-11-21) : QWERTY, w remplacé
-     * par ə (w n'existe pas en Muziŋ Dar ; il reste accessible par appui long
+     * par ə (w n'existe pas dans l'alphabet tchétchène ; il reste accessible par appui long
      * sur ə pour les mots étrangers), plus une rangée des 10 lettres les plus
      * fréquentes. Les autres par appui long sur leur lettre de base.
      */
