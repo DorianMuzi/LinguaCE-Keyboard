@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Tchétchène (ce), alphabet latin. Rédigé en cyrillique, translittéré avec
-  Dico3. À VALIDER par l'auteur.
+  Dico3. Validé par l'auteur le 2026-11-21 (lataye, xarƶa, Yuq̇, Kerla moġa),
+  sauf la dernière phrase de setup_intro (forme verbale à confirmer).
 -->
 <resources>
     <string name="ime_name">LinguaCE — noxçiyŋ</string>
     <string name="subtype_ce">Noxçiyŋ (latinica · kirillica)</string>
     <string name="setup_title">Noxçiyŋ klaviatura</string>
     <string name="setup_intro">LinguaCE proektaŋ klaviatura: noxçiyŋ latinaŋ elpaş (ẋ, ç̇, q̇, ŋ…) a, Ӏ klavişa yolu kirillica a. 🌐 latinica a, kirillica a xiycado. Klavişa dexxa ṫetajiyça, qiŋ elpaş goytu.</string>
-    <string name="setup_enable">1. LinguaCE Keyboard latae</string>
+    <string name="setup_enable">1. LinguaCE Keyboard lataye</string>
     <string name="setup_choose">2. LinguaCE Keyboard xarƶa</string>
     <string name="setup_try">Quzaẋ yazde…</string>
     <string name="setup_privacy">Qu klaviaturaŋ internete qaça yiş yac: aẋ yazdinarg ẋaŋ telefonera cq̇a a ara ca dolu.</string>
