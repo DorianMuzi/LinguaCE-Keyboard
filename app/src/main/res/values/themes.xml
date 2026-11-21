@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sans barre de titre système : l'écran a son propre en-tête (logo + nom).
+         Icônes de la barre d'état et de navigation sombres sur fond clair. -->
+    <style name="Setup" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>
