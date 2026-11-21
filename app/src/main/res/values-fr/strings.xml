@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ime_name">LinguaCE — tchétchène</string>
+    <string name="subtype_ce">Tchétchène (latin · cyrillique)</string>
+    <string name="setup_title">Clavier tchétchène</string>
+    <string name="setup_intro">Les lettres latines Muziŋ Dar (ẋ, ç̇, q̇, ŋ…) et le cyrillique avec la touche Ӏ. 🌐 passe de l\'un à l\'autre ; un appui long sur une touche donne ses autres lettres.</string>
+    <string name="setup_enable">1. Activer LinguaCE Keyboard</string>
+    <string name="setup_choose">2. Choisir LinguaCE Keyboard</string>
+    <string name="setup_try">Essaie ici…</string>
+    <string name="setup_privacy">Ce clavier n\'a pas accès à Internet : ce que tu tapes ne quitte jamais ton téléphone.</string>
+</resources>
