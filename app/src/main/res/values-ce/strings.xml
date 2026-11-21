@@ -30,4 +30,13 @@
     <string name="setup_learning">Ẋexamaş: aẋ yazdina deşnaş qu telefoneẋ beŋ ca düsu, yuxa ẋaxo. Üş cẋanẋa a dja ca doxüytu.</string>
     <string name="setup_clear">Jamiyna deşnaş djadakqa (%1$d)</string>
     <string name="setup_cleared">Jamiyna deşnaş djadäxna.</string>
+
+    <!-- Proposer ses mots : À VALIDER par l'auteur (rédigé en cyrillique, Dico3). -->
+    <string name="share_explain">Aẋ leloş dolu noxçiyŋ deşnaş txöga djadaxiyta megar du, massarna a ẋexamaş todaŋ. Deşnaş aẋ xarƶa, ṫakqa aẋa djadaxiyta: klaviaturo cẋa a huma dja ca doxüytu.</string>
+    <string name="share_button">Sayŋ deşnaş LinguaCE-na djadaxiyta</string>
+    <string name="share_title">Mülxa deşnaş djadaxiyta läa ẋuna?</string>
+    <string name="share_send">Djadaxiyta</string>
+    <string name="share_none">Hinca a kerla jamiyna deşnaş dac.</string>
+    <string name="share_subject">LinguaCE-na djadaxiytina deşnaş</string>
+    <string name="share_intro">As leloş dolu noxçiyŋ deşnaş, LinguaCE klaviaturina:</string>
 </resources>
