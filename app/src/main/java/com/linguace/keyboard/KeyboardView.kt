@@ -81,18 +81,23 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     private val density = resources.displayMetrics.density
     /**
-     * Hauteur des rangées, réglée sur le téléphone de l'auteur (2026-11-21) :
-     * 48 dp pour les dispositions de 4 rangées (latin, cyrillique, symboles) ;
-     * 42 dp si une disposition en avait 5 (l'ancienne rangée tchétchène du
-     * latin : à 48 dp l'ensemble était trop haut).
+     * Proportions de Gboard, mesurées sur le téléphone de l'auteur
+     * (2026-11-21) : une rangée tous les 50 dp, des touches de 40 dp de haut,
+     * donc 10 dp entre deux rangées — on touche moins souvent la rangée d'à
+     * côté. 42 dp si une disposition avait 5 rangées.
      */
     private val compactRowHeight = 42 * density
-    private val rowHeight = 48 * density
+    private val rowHeight = 50 * density
 
     @Suppress("UNUSED_PARAMETER")
     private fun rowHeightOf(r: Int): Float =
         if (layout.rows.size >= 5) compactRowHeight else rowHeight
+
+    /** Écart horizontal entre deux touches. */
     private val gap = 5 * density
+
+    /** Écart vertical entre deux rangées (Gboard : ≈ 10 dp). */
+    private val rowGap = 10 * density
     private val radius = 7 * density
     private val stripHeight = 40 * density
     private val stripSpace: Float
@@ -164,7 +169,10 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
         val rows = layout.rows.indices.sumOf { rowHeightOf(it).toDouble() }.toFloat()
-        val h = (stripSpace + rows + gap + bottomMargin).toInt() + bottomInset
+        // Bas de la dernière touche, puis la même marge qu'avant (validée par
+        // l'auteur) jusqu'aux boutons du système.
+        val lastKeyBottom = stripSpace + gap + rows - rowGap
+        val h = (lastKeyBottom + gap + bottomMargin).toInt() + bottomInset
         setMeasuredDimension(w, h)
     }
 
@@ -195,7 +203,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             val h = rowHeightOf(r)
             for (key in row) {
                 val w = key.width * unit
-                out += Placed(key, RectF(x + gap / 2, top, x + w - gap / 2, top + h - gap))
+                out += Placed(key, RectF(x + gap / 2, top, x + w - gap / 2, top + h - rowGap))
                 x += w
             }
             top += h
