@@ -117,9 +117,16 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         return insets
     }
 
+    /**
+     * Marge sous la dernière rangée, en plus de la barre de navigation : sans
+     * elle, 🌐 et ↵ collaient aux boutons du système (⌄, changement de
+     * clavier) — constaté sur un vrai téléphone, 2026-11-21.
+     */
+    private val bottomMargin = 10 * density
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
-        val h = (layout.rows.size * rowHeight + gap).toInt() + bottomInset
+        val h = (layout.rows.size * rowHeight + gap + bottomMargin).toInt() + bottomInset
         setMeasuredDimension(w, h)
     }
 
