@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Version monochrome (icônes à thème d'Android 13+) : mêmes formes, une seule
+  couleur que le système teinte ; l'intérieur de la bulle reste vide.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="3.7"
+        android:pathData="M28,52a26,26 0,1 0,52 0a26,26 0,1 0,-52 0z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M35.2,70.2L34.5,78.5L43.6,74.2Z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M36.2,54.2L45.8,42.4L49.5,46.8L55.5,34.9L62.2,46.8L65.1,43.8L72.6,54.2Z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M36.9,56.5h5.2v3.7h-5.2z M43.6,56.5h5.2v3.7h-5.2z M50.3,56.5h5.2v3.7h-5.2z M57,56.5h5.2v3.7h-5.2z M63.7,56.5h5.2v3.7h-5.2z M39.2,61.6h5.2v3.7h-5.2z M45.8,61.6h5.2v3.7h-5.2z M52.5,61.6h5.2v3.7h-5.2z M59.2,61.6h5.2v3.7h-5.2z M65.9,61.6h3.7v3.7h-3.7z M43.6,66.8h20.8v3.3h-20.8z" />
+</vector>
