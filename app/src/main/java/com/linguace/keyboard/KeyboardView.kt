@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
 import android.os.Build
 import android.os.Handler
@@ -238,6 +239,63 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         canvas.drawText(label, p.rect.centerX(), y, text)
     }
 
+    private val icon = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        strokeWidth = 2.2f * density
+        strokeJoin = Paint.Join.ROUND
+        strokeCap = Paint.Cap.ROUND
+    }
+
+    /**
+     * Flèche ⇧ : contour quand elle est éteinte, pleine pour une majuscule,
+     * pleine et soulignée quand les majuscules sont verrouillées.
+     */
+    private fun drawShiftIcon(canvas: Canvas, r: RectF) {
+        val s = 11 * density
+        val cx = r.centerX()
+        val cy = r.centerY() - 1.5f * density
+        val path = Path().apply {
+            moveTo(cx, cy - s)
+            lineTo(cx + s, cy)
+            lineTo(cx + s * 0.45f, cy)
+            lineTo(cx + s * 0.45f, cy + s * 0.85f)
+            lineTo(cx - s * 0.45f, cy + s * 0.85f)
+            lineTo(cx - s * 0.45f, cy)
+            lineTo(cx - s, cy)
+            close()
+        }
+        icon.color = if (shift == ShiftState.OFF) textColor else 0xFFFFFFFF.toInt()
+        icon.style = if (shift == ShiftState.OFF) Paint.Style.STROKE else Paint.Style.FILL_AND_STROKE
+        canvas.drawPath(path, icon)
+        if (shift == ShiftState.LOCKED) {
+            icon.style = Paint.Style.STROKE
+            val y = cy + s * 0.85f + 4 * density
+            canvas.drawLine(cx - s * 0.6f, y, cx + s * 0.6f, y, icon)
+        }
+    }
+
+    /** Effacer ⌫ : pentagone pointé vers la gauche, une croix à l'intérieur. */
+    private fun drawDeleteIcon(canvas: Canvas, r: RectF) {
+        val w = 13 * density
+        val h = 9 * density
+        val cx = r.centerX() + 1 * density
+        val cy = r.centerY()
+        val path = Path().apply {
+            moveTo(cx - w, cy)
+            lineTo(cx - w * 0.45f, cy - h)
+            lineTo(cx + w, cy - h)
+            lineTo(cx + w, cy + h)
+            lineTo(cx - w * 0.45f, cy + h)
+            close()
+        }
+        icon.color = textColor
+        icon.style = Paint.Style.STROKE
+        canvas.drawPath(path, icon)
+        val x = cx + w * 0.28f
+        val d = h * 0.45f
+        canvas.drawLine(x - d, cy - d, x + d, cy + d, icon)
+        canvas.drawLine(x - d, cy + d, x + d, cy - d, icon)
+    }
+
     private fun drawKey(canvas: Canvas, p: Placed) {
         val k = p.key
         if (k.type == KeyType.SUGGESTION) return drawSuggestion(canvas, p)
@@ -248,6 +306,11 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             else -> keyColor
         }
         canvas.drawRoundRect(p.rect, radius, radius, fill)
+
+        // ⇧ et ⌫ : icônes dessinées, épaisses comme sur Gboard (les caractères
+        // de la police étaient trop fins — retour de l'auteur).
+        if (k.type == KeyType.SHIFT) return drawShiftIcon(canvas, p.rect)
+        if (k.type == KeyType.DELETE) return drawDeleteIcon(canvas, p.rect)
 
         val shifted = shift != ShiftState.OFF
         val label = when (k.type) {

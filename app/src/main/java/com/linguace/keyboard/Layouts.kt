@@ -57,12 +57,13 @@ object Layouts {
                 k("h"), k("j"), k("k", "k$DOT"), k("l"), k("ə"),
             ),
             // ç a sa touche (ç̇ en appui long) ; c ne garde que ċ.
-            listOf(Key("⇧", KeyType.SHIFT, 1f)) +
+            shiftRow(
+                10f,
                 listOf(
                     k("z", "ƶ"), k("x", "ẋ"), k("c", "ċ"), k("v"),
                     k("b"), k("n", "ŋ"), k("m"), k("ç", "ç$DOT"),
-                ) +
-                Key("⌫", KeyType.DELETE, 1f),
+                ),
+            ),
             bottom(Key("123", KeyType.SYMBOLS, 1.25f)),
         ),
     )
@@ -80,9 +81,10 @@ object Layouts {
                 k("ш"), k("щ"), k("з"), k("х"),
             ),
             row("ф ы в а п р о л д ж э"),
-            listOf(Key("⇧", KeyType.SHIFT, 1f)) +
-                listOf(k("я"), k("ч"), k("с"), k("м"), k("и"), k("т"), k("ь", "ъ"), k("б"), k("ю")) +
-                Key("⌫", KeyType.DELETE, 1f),
+            shiftRow(
+                11f,
+                listOf(k("я"), k("ч"), k("с"), k("м"), k("и"), k("т"), k("ь", "ъ"), k("б"), k("ю")),
+            ),
             listOf(
                 Key("🌐", KeyType.GLOBE, 1.25f), Key("123", KeyType.SYMBOLS, 1.25f),
                 Key(","), Key("Ӏ", caseless = true), Key(" ", KeyType.SPACE, 3.75f),
@@ -104,6 +106,20 @@ object Layouts {
             ),
         ),
     )
+
+    /** Largeur de ⇧ et ⌫, en touches (Gboard : ≈ 1,5). */
+    const val FUNCTION_KEY_WIDTH = 1.4f
+
+    /**
+     * Rangée « ⇧ lettres ⌫ » : ⇧ et ⌫ larges comme sur Gboard (demande de
+     * l'auteur), les lettres se partagent le reste de la largeur [units].
+     */
+    private fun shiftRow(units: Float, letters: List<Key>): List<Key> {
+        val w = (units - 2 * FUNCTION_KEY_WIDTH) / letters.size
+        return listOf(Key("⇧", KeyType.SHIFT, FUNCTION_KEY_WIDTH)) +
+            letters.map { it.copy(width = w) } +
+            Key("⌫", KeyType.DELETE, FUNCTION_KEY_WIDTH)
+    }
 
     private fun bottom(switch: Key) = listOf(
         Key("🌐", KeyType.GLOBE, 1.25f), switch, Key(","),
