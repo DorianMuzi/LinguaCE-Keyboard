@@ -155,7 +155,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
      * elle, 🌐 et ↵ collaient aux boutons du système (⌄, changement de
      * clavier) — constaté sur un vrai téléphone, 2026-11-21.
      */
-    private val bottomMargin = 10 * density
+    private val bottomMargin = 16 * density
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
