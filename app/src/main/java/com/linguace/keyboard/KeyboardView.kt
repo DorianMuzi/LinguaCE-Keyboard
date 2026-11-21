@@ -57,7 +57,17 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         }
 
     private val density = resources.displayMetrics.density
-    private val rowHeight = 54 * density
+    /**
+     * Hauteur d'une rangée, proche de celle de Gboard. Le latin a une rangée
+     * de plus que les autres claviers (les lettres tchétchènes) : elle est un
+     * peu plus basse, pour que l'ensemble ne soit pas trop haut (retour de
+     * l'auteur sur son téléphone, 2026-11-21).
+     */
+    private val rowHeight = 48 * density
+    private val extraRowHeight = 42 * density
+
+    private fun rowHeightOf(r: Int): Float =
+        if (r == 0 && layout.id == Layouts.LATIN.id) extraRowHeight else rowHeight
     private val gap = 5 * density
     private val radius = 7 * density
 
@@ -126,7 +136,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
-        val h = (layout.rows.size * rowHeight + gap + bottomMargin).toInt() + bottomInset
+        val rows = layout.rows.indices.sumOf { rowHeightOf(it).toDouble() }.toFloat()
+        val h = (rows + gap + bottomMargin).toInt() + bottomInset
         setMeasuredDimension(w, h)
     }
 
@@ -140,15 +151,17 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private fun place() {
         val unit = (width - gap) / layout.units
         val out = mutableListOf<Placed>()
+        var top = gap
         layout.rows.forEachIndexed { r, row ->
             val rowUnits = row.sumOf { it.width.toDouble() }.toFloat()
             var x = gap / 2 + (layout.units - rowUnits) * unit / 2
-            val top = r * rowHeight + gap
+            val h = rowHeightOf(r)
             for (key in row) {
                 val w = key.width * unit
-                out += Placed(key, RectF(x + gap / 2, top, x + w - gap / 2, top + rowHeight - gap))
+                out += Placed(key, RectF(x + gap / 2, top, x + w - gap / 2, top + h - gap))
                 x += w
             }
+            top += h
         }
         placed = out
     }
@@ -182,9 +195,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         }
         text.color = if (k.type == KeyType.SHIFT && shift != ShiftState.OFF) 0xFFFFFFFF.toInt() else textColor
         text.textSize = when (k.type) {
-            KeyType.CHAR -> 22 * density
+            KeyType.CHAR -> 20 * density
             KeyType.SPACE -> 13 * density
-            else -> 17 * density
+            else -> 16 * density
         }
         if (k.type == KeyType.SPACE) text.color = hintColor
         val y = p.rect.centerY() - (text.descent() + text.ascent()) / 2
