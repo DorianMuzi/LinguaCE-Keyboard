@@ -6,11 +6,13 @@ import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowInsets
 
 enum class ShiftState { OFF, ONCE, LOCKED }
 
@@ -85,9 +87,30 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private var repeating = false
     private var longPressed = false
 
+    /**
+     * Hauteur de la barre de navigation du système. Depuis Android 15, le
+     * clavier s'étend dessous (bord à bord) : sans cette marge, les boutons
+     * du système (⌄, changement de clavier) recouvrent 🌐 et ↵.
+     */
+    private var bottomInset = 0
+
+    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        val bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            insets.getInsets(WindowInsets.Type.navigationBars()).bottom
+        } else {
+            @Suppress("DEPRECATION")
+            insets.systemWindowInsetBottom
+        }
+        if (bottom != bottomInset) {
+            bottomInset = bottom
+            requestLayout()
+        }
+        return insets
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
-        val h = (layout.rows.size * rowHeight + gap).toInt()
+        val h = (layout.rows.size * rowHeight + gap).toInt() + bottomInset
         setMeasuredDimension(w, h)
     }
 
