@@ -45,8 +45,11 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     var suggestions: List<String> = emptyList()
         set(value) {
             if (field == value) return
+            val resize = field.isEmpty() != value.isEmpty()
             field = value
-            place()
+            // La bande n'apparaît que s'il y a des mots à proposer (demande de
+            // l'auteur) : le clavier change donc de hauteur à ce moment-là.
+            if (resize) requestLayout() else place()
             invalidate()
             announceChange()
         }
@@ -92,7 +95,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private val gap = 5 * density
     private val radius = 7 * density
     private val stripHeight = 40 * density
-    private val stripSpace: Float get() = if (showStrip) stripHeight else 0f
+    private val stripSpace: Float
+        get() = if (showStrip && suggestions.isNotEmpty()) stripHeight else 0f
 
     private val dark =
         (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
@@ -111,7 +115,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER }
     private val hint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textAlign = Paint.Align.RIGHT
-        textSize = 10 * density
+        textSize = 9 * density
         color = hintColor
     }
 
@@ -255,13 +259,19 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             else -> 16 * density
         }
         if (k.type == KeyType.SPACE) text.color = hintColor
-        val y = p.rect.centerY() - (text.descent() + text.ascent()) / 2
+        // Touche avec lettre d'appui long : la lettre principale descend un peu
+        // et l'indice se loge dans le coin, pour que les majuscules (plus
+        // hautes, Q̇ Ṫ Ə…) ne touchent pas l'indice (retour de l'auteur).
+        val hasHint = k.popup.isNotEmpty()
+        // Toutes les lettres descendent d'autant : elles restent alignées.
+        val drop = if (k.type == KeyType.CHAR) 2.5f * density else 0f
+        val y = p.rect.centerY() - (text.descent() + text.ascent()) / 2 + drop
         canvas.drawText(label, p.rect.centerX(), y, text)
 
-        if (k.popup.isNotEmpty()) {
+        if (hasHint) {
             canvas.drawText(
                 k.popup.first().let { if (shifted) Alphabet.upper(it) else it },
-                p.rect.right - 4 * density, p.rect.top + 12 * density, hint,
+                p.rect.right - 2.5f * density, p.rect.top + 10.5f * density, hint,
             )
         }
     }
