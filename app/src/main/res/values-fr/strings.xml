@@ -2,7 +2,8 @@
 <resources>
     <string name="ime_name">LinguaCE — tchétchène</string>
     <string name="setup_title">Clavier tchétchène</string>
-    <string name="setup_intro">Un clavier du projet LinguaCE : les lettres latines tchétchènes (ẋ, ç̇, q̇, ŋ…) et le cyrillique avec la touche Ӏ. 🌐 passe de l\'un à l\'autre ; un appui long sur une touche donne ses autres lettres.</string>
+    <!--   : espace insécable, pour ne pas couper « x → ẋ » en fin de ligne. -->
+    <string name="setup_intro">Écris le tchétchène en latin et en cyrillique — un projet LinguaCE.\n\n• 🌐 : passer du latin au cyrillique.\n• Appui long sur une lettre : ses variantes (x → ẋ, s → ş, ç → ç̇…).\n• En cyrillique, la touche Ӏ (palotchka).\n• Tape sans accents : « noxciyn » te propose « noxçiyŋ ».</string>
     <string name="setup_enable">1. Activer LinguaCE Keyboard</string>
     <string name="setup_choose">2. Choisir LinguaCE Keyboard</string>
     <string name="setup_try">Essaie ici…</string>

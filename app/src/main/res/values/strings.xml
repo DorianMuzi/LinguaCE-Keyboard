@@ -5,7 +5,7 @@
     <!-- Comme Gboard : la langue écrite dans la langue elle-même, sur tous les téléphones. -->
     <string name="subtype_ce" translatable="false">Noxçiyŋ · Нохчийн</string>
     <string name="setup_title">Chechen keyboard</string>
-    <string name="setup_intro">A keyboard from the LinguaCE project: Chechen Latin letters (ẋ, ç̇, q̇, ŋ…) and Cyrillic with the Ӏ key. 🌐 switches between them; hold a key for its other letters.</string>
+    <string name="setup_intro">Write Chechen in Latin and Cyrillic script — a LinguaCE project.\n\n• 🌐: switch between Latin and Cyrillic.\n• Hold a letter for its variants (x → ẋ, s → ş, ç → ç̇…).\n• In Cyrillic, the Ӏ key (palochka).\n• Type without accents: “noxciyn” suggests “noxçiyŋ”.</string>
     <string name="setup_enable">1. Enable LinguaCE Keyboard</string>
     <string name="setup_choose">2. Choose LinguaCE Keyboard</string>
     <string name="setup_try">Try it here…</string>
