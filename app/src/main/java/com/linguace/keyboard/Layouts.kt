@@ -36,10 +36,9 @@ object Layouts {
     private fun row(s: String) = s.split(" ").map { Key(it) }
 
     /**
-     * Latin tchétchène (choix de l'auteur, 2026-11-21) : QWERTY, w remplacé
-     * par ə (w n'existe pas dans l'alphabet tchétchène ; il reste accessible
-     * par appui long sur ə pour les mots étrangers). Les lettres à diacritique
-     * sont sur l'appui long de leur lettre de base (c → ċ ç ç̇, x → ẋ…).
+     * Latin tchétchène (choix de l'auteur, 2026-11-21) : QWERTY de 4 rangées,
+     * avec ə et ç sur leurs propres touches ; les autres lettres à diacritique
+     * sont sur l'appui long de leur lettre de base (x → ẋ, s → ş…).
      */
     val LATIN = Layout(
         "latin",
@@ -47,22 +46,23 @@ object Layouts {
             // Plus de rangée de lettres tchétchènes (décision de l'auteur,
             // 2026-11-21) : chaque variante est sur l'appui long de sa lettre
             // de base, ce qui garde un clavier de 4 rangées comme le cyrillique.
+            // w à sa place QWERTY (mots étrangers : WhatsApp, Wi-Fi, Wagner…).
             listOf(
-                // w (hors alphabet) par appui long sur ə, à sa place QWERTY :
-                // mots d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
-                k("q", "q$DOT"), k("ə", "w"), k("e", "ə"), k("r"), k("t", "ṫ"),
+                k("q", "q$DOT"), k("w"), k("e"), k("r"), k("t", "ṫ"),
                 k("y"), k("u", "ü"), k("i"), k("o", "ö"), k("p", "ṗ"),
             ),
+            // ə a sa touche, à droite de l, comme sur le clavier azerbaïdjanais.
             listOf(
                 k("a", "ä"), k("s", "ş"), k("d"), k("f"), k("g", "ġ"),
-                k("h"), k("j"), k("k", "k$DOT"), k("l"),
+                k("h"), k("j"), k("k", "k$DOT"), k("l"), k("ə"),
             ),
-            listOf(Key("⇧", KeyType.SHIFT, 1.5f)) +
+            // ç a sa touche (ç̇ en appui long) ; c ne garde que ċ.
+            listOf(Key("⇧", KeyType.SHIFT, 1f)) +
                 listOf(
-                    k("z", "ƶ"), k("x", "ẋ"), k("c", "ċ", "ç", "ç$DOT"), k("v"),
-                    k("b"), k("n", "ŋ"), k("m"),
+                    k("z", "ƶ"), k("x", "ẋ"), k("c", "ċ"), k("v"),
+                    k("b"), k("n", "ŋ"), k("m"), k("ç", "ç$DOT"),
                 ) +
-                Key("⌫", KeyType.DELETE, 1.5f),
+                Key("⌫", KeyType.DELETE, 1f),
             bottom(Key("123", KeyType.SYMBOLS, 1.25f)),
         ),
     )

@@ -28,33 +28,31 @@ class LayoutsTest {
     }
 
     @Test
-    fun w_isOutsideTheAlphabet_butTypeableForForeignWords() {
+    fun w_isOutsideTheAlphabet_butHasItsQwertyKey() {
         assertFalse("w" in Alphabet.LETTERS)
-        // Pas de touche w : appui long sur ə, à la place de w en QWERTY.
-        val keys = Layouts.LATIN.rows.flatten()
-        assertFalse(keys.any { it.label == "w" })
-        val schwa = Layouts.LATIN.rows[0][1]
-        assertEquals("ə", schwa.label)
-        assertEquals(listOf("w"), schwa.popup)
+        assertEquals("w", Layouts.LATIN.rows[0][1].label)
         assertEquals("W", Key("w").output(true))
     }
 
     @Test
-    fun latin_isFourRowsOfQwerty_withSchwaInsteadOfW() {
+    fun latin_layoutChosenByTheAuthor() {
         assertEquals(4, Layouts.LATIN.rows.size)
-        assertEquals(
-            "q ə e r t y u i o p",
-            Layouts.LATIN.rows.first().joinToString(" ") { it.label },
-        )
-        // Aucune touche à diacritique : toutes en appui long.
-        val keys = Layouts.LATIN.rows.flatten().filter { it.type == KeyType.CHAR }
-        assertFalse(keys.any { k -> k.label.any { it.code > 0x7F } && k.label != "ə" })
+        fun row(i: Int) = Layouts.LATIN.rows[i].joinToString(" ") { it.label }
+        assertEquals("q w e r t y u i o p", row(0))
+        assertEquals("a s d f g h j k l ə", row(1))
+        assertEquals("⇧ z x c v b n m ç ⌫", row(2))
+        // Seules ə et ç ont leur touche ; les autres variantes sont en appui long.
+        val special = Layouts.LATIN.rows.flatten()
+            .filter { k -> k.type == KeyType.CHAR && k.label.any { it.code > 0x7F } }
+            .map { it.label }
+        assertEquals(listOf("ə", "ç"), special)
     }
 
     @Test
     fun everyVariant_isOnItsBaseLetter() {
         val popups = Layouts.LATIN.rows.flatten().associate { it.label to it.popup }
-        assertEquals(listOf("ċ", "ç", "ç$DOT"), popups["c"])
+        assertEquals(listOf("ċ"), popups["c"])
+        assertEquals(listOf("ç$DOT"), popups["ç"])
         assertEquals(listOf("ẋ"), popups["x"])
         assertEquals(listOf("ş"), popups["s"])
         assertEquals(listOf("ŋ"), popups["n"])
@@ -65,7 +63,7 @@ class LayoutsTest {
 
     @Test
     fun combiningLetters_areEmittedAsLetterPlusDot() {
-        val cDot = Layouts.LATIN.rows.flatten().first { it.label == "c" }.popup.last()
+        val cDot = Layouts.LATIN.rows.flatten().first { it.label == "ç" }.popup.single()
         assertEquals("ç̇", cDot)
         assertEquals("Ç̇", Alphabet.upper(cDot))
         assertEquals(2, Alphabet.upper(cDot).length)

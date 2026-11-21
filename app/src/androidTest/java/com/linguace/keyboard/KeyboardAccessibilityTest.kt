@@ -70,7 +70,7 @@ class KeyboardAccessibilityTest {
     fun everyLatinKey_isANamedClickableNode() {
         val n = nodes()
         assertEquals(Layouts.LATIN.rows.sumOf { it.size }, n.size)
-        for (name in listOf("c", "q", "x", "ə", desc(R.string.key_delete),
+        for (name in listOf("c", "ç", "w", "x", "ə", desc(R.string.key_delete),
             desc(R.string.key_shift), desc(R.string.key_globe), desc(R.string.key_space))) {
             val node = n[name]
             assertNotNull("touche « $name » absente", node)
@@ -94,16 +94,14 @@ class KeyboardAccessibilityTest {
         val (id, node) = nodes()["c"]!!
         val labels = node.actionList.mapNotNull { it.label?.toString() }
         val typeLetter = desc(R.string.key_type_letter)
-        assertEquals(
-            listOf("ċ", "ç", "ç̇").map { typeLetter.replace("%1\$s", it) },
-            labels,
-        )
-        onMain { provider.performAction(id, R.id.a11y_alt_2, null) }
-        assertEquals(listOf("ç̇"), typed)
+        assertEquals(listOf(typeLetter.replace("%1\$s", "ċ")), labels)
+        onMain { provider.performAction(id, R.id.a11y_alt_0, null) }
+        assertEquals(listOf("ċ"), typed)
 
-        val (schwa, _) = nodes()["ə"]!!
-        onMain { provider.performAction(schwa, R.id.a11y_alt_0, null) }
-        assertEquals(listOf("ç̇", "w"), typed)
+        // ç a sa touche ; ç̇ en action TalkBack.
+        val (cedilla, _) = nodes()["ç"]!!
+        onMain { provider.performAction(cedilla, R.id.a11y_alt_0, null) }
+        assertEquals(listOf("ċ", "ç̇"), typed)
     }
 
     @Test
