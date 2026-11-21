@@ -83,6 +83,16 @@ class SuggestionsTest {
     }
 
     @Test
+    fun newWords_areLearnedWordsNotInTheSeed_mostUsedFirst() {
+        val s = WordStore(seed)
+        s.learn("barkalla") // déjà dans la liste de base : pas à proposer
+        s.learn("zarg")
+        s.learn("baq̇o")
+        s.learn("baq̇o")
+        assertEquals(listOf("baq̇o", "zarg"), s.newWords())
+    }
+
+    @Test
     fun currentWord_isTheLettersBeforeTheCursor() {
         assertEquals("Naxç̇", WordStore.currentWord("Salam, Naxç̇"))
         assertEquals("", WordStore.currentWord("Salam "))

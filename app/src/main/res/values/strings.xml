@@ -24,4 +24,11 @@
     <string name="setup_learning">Suggestions: words you type are remembered on this phone only, to suggest them again. They are never sent.</string>
     <string name="setup_clear">Erase learned words (%1$d)</string>
     <string name="setup_cleared">Learned words erased.</string>
+    <string name="share_explain">You can send us the Chechen words you use, to enrich the suggestions for everyone. You choose the words, then send them yourself: the keyboard sends nothing on its own.</string>
+    <string name="share_button">Suggest my words to LinguaCE</string>
+    <string name="share_title">Which words do you want to send?</string>
+    <string name="share_send">Send</string>
+    <string name="share_none">No new learned words yet.</string>
+    <string name="share_subject">Words suggested for LinguaCE</string>
+    <string name="share_intro">Here are Chechen words I use, suggested for the LinguaCE keyboard:</string>
 </resources>

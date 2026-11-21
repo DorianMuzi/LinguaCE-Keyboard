@@ -250,6 +250,16 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
             prefs.edit().putInt(EPOCH_KEY, prefs.getInt(EPOCH_KEY, 0) + 1).apply()
         }
 
+        /** Mots appris absents de la liste de base (à proposer au projet). */
+        fun newWords(context: Context): List<String> {
+            val seed = runCatching {
+                context.assets.open(SEED_FILE).bufferedReader().use { it.readText() }
+            }.getOrDefault("")
+            val store = WordStore(WordStore.parseSeed(seed))
+            store.load(runCatching { File(context.filesDir, LEARNED_FILE).readText() }.getOrDefault(""))
+            return store.newWords()
+        }
+
         fun learnedCount(context: Context): Int =
             runCatching {
                 File(context.filesDir, LEARNED_FILE).readLines().count { it.contains('\t') }

@@ -22,4 +22,11 @@
     <string name="setup_learning">Подсказки: слова, которые вы печатаете, запоминаются только на этом телефоне, чтобы предлагать их снова. Они никуда не отправляются.</string>
     <string name="setup_clear">Стереть выученные слова (%1$d)</string>
     <string name="setup_cleared">Выученные слова стёрты.</string>
+    <string name="share_explain">Вы можете прислать нам чеченские слова, которые используете, чтобы улучшить подсказки для всех. Вы сами выбираете слова и отправляете их: клавиатура ничего не отправляет сама.</string>
+    <string name="share_button">Предложить мои слова LinguaCE</string>
+    <string name="share_title">Какие слова отправить?</string>
+    <string name="share_send">Отправить</string>
+    <string name="share_none">Новых выученных слов пока нет.</string>
+    <string name="share_subject">Слова для LinguaCE</string>
+    <string name="share_intro">Вот чеченские слова, которые я использую, — предложение для клавиатуры LinguaCE:</string>
 </resources>

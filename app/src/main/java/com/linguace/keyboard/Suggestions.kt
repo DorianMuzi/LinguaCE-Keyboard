@@ -53,6 +53,16 @@ class WordStore(private val seed: Map<String, Int> = emptyMap()) {
     fun clear() = learned.clear()
 
     /**
+     * Mots appris que la liste de base ne connaît pas encore, les plus
+     * utilisés d'abord : ceux que l'utilisateur peut proposer au projet.
+     */
+    fun newWords(): List<String> =
+        learned.entries
+            .filter { it.key !in seed }
+            .sortedWith(compareByDescending<Map.Entry<String, Int>> { it.value }.thenBy { it.key })
+            .map { it.key }
+
+    /**
      * Jusqu'à [limit] mots qui commencent comme [prefix], accents ignorés.
      * Ordre : début identique à la lettre près, puis mots appris (fréquence),
      * puis liste de base (poids). La casse suit celle de [prefix].

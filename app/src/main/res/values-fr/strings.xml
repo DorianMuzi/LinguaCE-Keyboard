@@ -22,4 +22,11 @@
     <string name="setup_learning">Suggestions : les mots que tu tapes sont retenus sur ce téléphone seulement, pour te les proposer ensuite. Ils ne sont jamais envoyés.</string>
     <string name="setup_clear">Effacer les mots appris (%1$d)</string>
     <string name="setup_cleared">Mots appris effacés.</string>
+    <string name="share_explain">Tu peux nous envoyer les mots tchétchènes que tu utilises, pour enrichir les suggestions de tous. Tu choisis les mots, puis tu les envoies toi-même : le clavier, lui, n\'envoie rien.</string>
+    <string name="share_button">Proposer mes mots à LinguaCE</string>
+    <string name="share_title">Quels mots veux-tu envoyer ?</string>
+    <string name="share_send">Envoyer</string>
+    <string name="share_none">Pas encore de nouveau mot appris.</string>
+    <string name="share_subject">Mots proposés pour LinguaCE</string>
+    <string name="share_intro">Voici des mots tchétchènes que j\'utilise, proposés pour le clavier LinguaCE :</string>
 </resources>

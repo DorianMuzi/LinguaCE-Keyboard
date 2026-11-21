@@ -74,6 +74,13 @@ class SetupActivity : Activity() {
 
         // Suggestions : les mots appris restent sur le téléphone, effaçables ici.
         column.addView(text(R.string.setup_learning, 14f))
+
+        // Proposer ses mots au projet : l'utilisateur choisit, puis envoie lui-même.
+        column.addView(text(R.string.share_explain, 14f).apply { setPadding(0, dp(8), 0, dp(8)) })
+        column.addView(Button(this).apply {
+            setText(R.string.share_button)
+            setOnClickListener { shareWords() }
+        })
         column.addView(Button(this).apply {
             fun refresh() {
                 val n = LinguaImeService.learnedCount(this@SetupActivity)
@@ -117,5 +124,46 @@ class SetupActivity : Activity() {
         setContentView(scroll)
     }
 
+    /**
+     * Liste des mots appris (aucun coché d'avance : ils peuvent contenir des
+     * prénoms ou des mots privés), puis menu de partage d'Android avec un
+     * e-mail pré-rempli. Le clavier n'envoie rien lui-même.
+     */
+    private fun shareWords() {
+        val words = LinguaImeService.newWords(this)
+        if (words.isEmpty()) {
+            android.widget.Toast.makeText(this, R.string.share_none, android.widget.Toast.LENGTH_LONG).show()
+            return
+        }
+        val checked = BooleanArray(words.size)
+        android.app.AlertDialog.Builder(this)
+            .setTitle(R.string.share_title)
+            .setMultiChoiceItems(words.toTypedArray(), checked) { _, i, on -> checked[i] = on }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.share_send) { _, _ ->
+                val chosen = words.filterIndexed { i, _ -> checked[i] }
+                if (chosen.isNotEmpty()) sendWords(chosen)
+            }
+            .show()
+    }
+
+    private fun sendWords(words: List<String>) {
+        val body = getString(R.string.share_intro) + "\n\n" + words.joinToString("\n") +
+            "\n\n— LinguaCE Keyboard " +
+            runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull().orEmpty()
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(PROJECT_EMAIL))
+            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject))
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
+        startActivity(Intent.createChooser(send, getString(R.string.share_button)))
+    }
+
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+    companion object {
+        /** Adresse du projet, choisie par l'auteur (2026-11-21). */
+        const val PROJECT_EMAIL = "linguachechen@gmail.com"
+    }
 }
