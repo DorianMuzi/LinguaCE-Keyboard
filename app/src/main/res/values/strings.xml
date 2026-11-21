@@ -2,7 +2,8 @@
 <resources>
     <string name="app_name">LinguaCE Keyboard</string>
     <string name="ime_name">LinguaCE — Chechen</string>
-    <string name="subtype_ce">Chechen (Latin · Cyrillic)</string>
+    <!-- Comme Gboard : la langue écrite dans la langue elle-même, sur tous les téléphones. -->
+    <string name="subtype_ce" translatable="false">Noxçiyŋ · Нохчийн</string>
     <string name="setup_title">Chechen keyboard</string>
     <string name="setup_intro">A keyboard from the LinguaCE project: Chechen Latin letters (ẋ, ç̇, q̇, ŋ…) and Cyrillic with the Ӏ key. 🌐 switches between them; hold a key for its other letters.</string>
     <string name="setup_enable">1. Enable LinguaCE Keyboard</string>

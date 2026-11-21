@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ime_name">LinguaCE — чеченский</string>
-    <string name="subtype_ce">Чеченский (латиница · кириллица)</string>
     <string name="setup_title">Чеченская клавиатура</string>
     <string name="setup_intro">Клавиатура проекта LinguaCE: чеченские латинские буквы (ẋ, ç̇, q̇, ŋ…) и кириллица с клавишей Ӏ. 🌐 переключает раскладки; долгое нажатие на клавишу открывает другие буквы.</string>
     <string name="setup_enable">1. Включить LinguaCE Keyboard</string>
