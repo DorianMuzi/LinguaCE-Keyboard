@@ -58,16 +58,14 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     private val density = resources.displayMetrics.density
     /**
-     * Hauteur d'une rangée, proche de celle de Gboard. Le latin a une rangée
-     * de plus que les autres claviers (les lettres tchétchènes) : elle est un
-     * peu plus basse, pour que l'ensemble ne soit pas trop haut (retour de
-     * l'auteur sur son téléphone, 2026-11-21).
+     * Hauteur d'une rangée : 42 dp pour toutes, la taille que l'auteur a
+     * trouvée juste sur son téléphone (essais à 54 puis 48 dp, trop hauts —
+     * 2026-11-21).
      */
-    private val rowHeight = 48 * density
-    private val extraRowHeight = 42 * density
+    private val rowHeight = 42 * density
 
-    private fun rowHeightOf(r: Int): Float =
-        if (r == 0 && layout.id == Layouts.LATIN.id) extraRowHeight else rowHeight
+    @Suppress("UNUSED_PARAMETER")
+    private fun rowHeightOf(r: Int): Float = rowHeight
     private val gap = 5 * density
     private val radius = 7 * density
 
