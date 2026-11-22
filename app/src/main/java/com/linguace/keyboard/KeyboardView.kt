@@ -357,7 +357,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private fun drawShiftIcon(canvas: Canvas, r: RectF) {
         val s = 11 * density
         val cx = r.centerX()
-        val cy = r.centerY() - 1.5f * density
+        // La flèche va de cy − s à cy + 0,85 s : on la centre exactement.
+        val cy = r.centerY() + 0.075f * s
         val path = Path().apply {
             moveTo(cx, cy - s)
             lineTo(cx + s, cy)
@@ -382,7 +383,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private fun drawDeleteIcon(canvas: Canvas, r: RectF) {
         val w = 13 * density
         val h = 9 * density
-        val cx = r.centerX() + 1 * density
+        // Le pentagone va de cx − w à cx + w : centré exactement dans la touche.
+        val cx = r.centerX()
         val cy = r.centerY()
         val path = Path().apply {
             moveTo(cx - w, cy)
@@ -414,6 +416,26 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         canvas.drawText(p.key.label, p.rect.centerX(), y, text)
     }
 
+    /** Entrée ↵ : flèche coudée (descend puis part vers la gauche), même trait que ⇧ et ⌫. */
+    private fun drawEnterIcon(canvas: Canvas, r: RectF) {
+        val s = 11 * density
+        val cx = r.centerX()
+        // De cy − 0,7 s (haut) à cy + 0,9 s (pointe de la flèche) : centrée.
+        val cy = r.centerY() - 0.1f * s
+        val head = s * 0.6f
+        val path = Path().apply {
+            moveTo(cx + s, cy - 0.7f * s)
+            lineTo(cx + s, cy + 0.3f * s)
+            lineTo(cx - s, cy + 0.3f * s)
+            moveTo(cx - s + head, cy + 0.3f * s - head)
+            lineTo(cx - s, cy + 0.3f * s)
+            lineTo(cx - s + head, cy + 0.3f * s + head)
+        }
+        icon.color = textColor
+        icon.style = Paint.Style.STROKE
+        canvas.drawPath(path, icon)
+    }
+
     private fun drawKey(canvas: Canvas, p: Placed) {
         val k = p.key
         if (k.type == KeyType.SUGGESTION) return drawSuggestion(canvas, p)
@@ -432,6 +454,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         // de la police étaient trop fins — retour de l'auteur).
         if (k.type == KeyType.SHIFT) return drawShiftIcon(canvas, p.rect)
         if (k.type == KeyType.DELETE) return drawDeleteIcon(canvas, p.rect)
+        if (k.type == KeyType.ENTER) return drawEnterIcon(canvas, p.rect)
 
         val shifted = shift != ShiftState.OFF
         val label = when (k.type) {
