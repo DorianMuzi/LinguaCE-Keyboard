@@ -57,4 +57,23 @@
     <string name="dict_invalid">Deşaŋ şiə elp muq̇ane a xila deza, teraẋ a, bilgalo a yocuş.</string>
     <string name="dict_clear_all">Masso a djadakqa</string>
     <string name="dict_clear_confirm">Masso a jamiyna deşnaş djadakqiy?</string>
+
+    <!-- Sections, barre d'outils, onglets emoji (liste de l'auteur, 2026-11-22).
+         Titres de section en minuscules : le Ə majuscule n'est pas encore fixé
+         dans la spécification de l'alphabet. -->
+    <string name="section_layout">Hottam</string>
+    <string name="section_appearance">Kep</string>
+    <string name="section_typing">Yazdar</string>
+    <string name="section_privacy">Q̇ayle larəyar</string>
+    <string name="setup_tips">Ẋexamaş</string>
+    <string name="set_toolbar">Ġirsiyŋ moġa</string>
+    <string name="tool_settings">Klaviaturaŋ nisdaraş</string>
+    <string name="tool_undo">Yuxadakqar</string>
+    <string name="tool_paste">Ṫelator</string>
+    <string name="emoji_recent">Ṫäxẋarniş</string>
+    <string name="emoji_smileys">Samuq̇ane a, nax a</string>
+    <string name="emoji_nature">Diynataş a, jalam a</string>
+    <string name="emoji_food">Yaa huma a, malarş a</string>
+    <string name="emoji_activities">Ġullaqaş, neq̇aş, humanaş</string>
+    <string name="emoji_symbols">Bilgalonaş</string>
 </resources>
