@@ -41,6 +41,13 @@
     <string name="set_height_large">Grande</string>
     <string name="set_autocaps">Majuscule en début de phrase</string>
     <string name="set_double_space">Double espace pour un point</string>
+    <string name="key_emoji">Emoji</string>
+    <string name="emoji_recent">Emoji récents</string>
+    <string name="emoji_smileys">Smileys et personnes</string>
+    <string name="emoji_nature">Animaux et nature</string>
+    <string name="emoji_food">Nourriture et boissons</string>
+    <string name="emoji_activities">Activités, voyages et objets</string>
+    <string name="emoji_symbols">Symboles</string>
     <string name="setup_dictionary">Dictionnaire personnel (%1$d)</string>
     <string name="dict_title">Dictionnaire personnel</string>
     <string name="dict_intro">Les mots que le clavier a appris de toi, les plus utilisés d\'abord. Supprime ceux que tu ne veux plus voir proposés, ou ajoute les tiens (prénoms, lieux…).</string>

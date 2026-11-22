@@ -2,12 +2,22 @@ package com.linguace.keyboard
 
 import com.linguace.keyboard.Alphabet.DOT
 
-/** SUGGESTION : un mot proposé dans la bande au-dessus des touches. */
-enum class KeyType { CHAR, SHIFT, DELETE, ENTER, SPACE, GLOBE, SYMBOLS, LETTERS, SUGGESTION }
+/**
+ * SUGGESTION : un mot proposé dans la bande au-dessus des touches.
+ * EMOJI : ouvre le panneau des emoji. PAGE : onglet d'une catégorie d'emoji
+ * (son [Key.target]). PICTO : un emoji à taper.
+ */
+enum class KeyType {
+    CHAR, SHIFT, DELETE, ENTER, SPACE, GLOBE, SYMBOLS, LETTERS, SUGGESTION,
+    EMOJI, PAGE, PICTO,
+}
 
 /**
  * Une touche. [width] en unités (1 = une touche de lettre). [popup] : lettres
  * proposées par appui long. [caseless] : jamais mise en majuscule (Ӏ).
+ * [longAction] : action de l'appui long quand ce n'est pas un choix de lettres
+ * (la virgule ouvre les emoji, comme sur Gboard). [target] : page visée par un
+ * onglet.
  */
 data class Key(
     val label: String,
@@ -15,6 +25,8 @@ data class Key(
     val width: Float = 1f,
     val popup: List<String> = emptyList(),
     val caseless: Boolean = false,
+    val longAction: KeyType? = null,
+    val target: String = "",
 ) {
     /** Texte émis, selon l'état de la touche ⇧. */
     fun output(shifted: Boolean): String =
@@ -27,9 +39,22 @@ data class Key(
     val variant: String? get() = popup.firstOrNull { !(it.length == 1 && it[0].isDigit()) }
 }
 
-data class Layout(val id: String, val rows: List<List<Key>>) {
+/**
+ * [scrollRows] : nombre de rangées du haut qui défilent verticalement (la
+ * grille des emoji) ; [VISIBLE_SCROLL_ROWS] sont visibles à la fois, les
+ * rangées suivantes (les onglets) restent fixes en bas.
+ */
+data class Layout(val id: String, val rows: List<List<Key>>, val scrollRows: Int = 0) {
     /** Disposition latine (QWERTY ou AZERTY). */
     val isLatin: Boolean get() = id.startsWith("latin")
+
+    /** Rangées affichées en même temps (donc la hauteur du clavier). */
+    val visibleRows: Int
+        get() = if (scrollRows > 0) VISIBLE_SCROLL_ROWS + (rows.size - scrollRows) else rows.size
+
+    companion object {
+        const val VISIBLE_SCROLL_ROWS = 3
+    }
 
     /** Largeur de la rangée la plus large, en unités. */
     val units: Float get() = rows.maxOf { row -> row.sumOf { it.width.toDouble() }.toFloat() }
@@ -130,7 +155,7 @@ object Layouts {
             ),
             listOf(
                 Key("🌐", KeyType.GLOBE, 1.25f), Key("123", KeyType.SYMBOLS, 1.25f),
-                Key(","), Key("Ӏ", caseless = true), Key(" ", KeyType.SPACE, 3.75f),
+                comma(), Key("Ӏ", caseless = true), Key(" ", KeyType.SPACE, 3.75f),
                 Key("."), Key("↵", KeyType.ENTER, 1.75f),
             ),
         ),
@@ -144,7 +169,8 @@ object Layouts {
             row("* \" ' : ; ! ? « »") + Key("⌫", KeyType.DELETE, 1f),
             listOf(
                 Key("abc", KeyType.LETTERS, 1.5f), Key("🌐", KeyType.GLOBE, 1.25f),
-                Key(","), Key(" ", KeyType.SPACE, 3.75f), Key("."),
+                Key("😊", KeyType.EMOJI, 1.25f),
+                Key(","), Key(" ", KeyType.SPACE, 2.5f), Key("."),
                 Key("↵", KeyType.ENTER, 1.5f),
             ),
         ),
@@ -173,8 +199,11 @@ object Layouts {
             if (i < 10) key.copy(popup = key.popup + ((i + 1) % 10).toString()) else key
         }
 
+    /** Appui long sur la virgule : le panneau des emoji (comme Gboard). */
+    private fun comma() = Key(",", longAction = KeyType.EMOJI)
+
     private fun bottom(switch: Key) = listOf(
-        Key("🌐", KeyType.GLOBE, 1.25f), switch, Key(","),
+        Key("🌐", KeyType.GLOBE, 1.25f), switch, comma(),
         Key(" ", KeyType.SPACE, 4f), Key("."), Key("↵", KeyType.ENTER, 1.5f),
     )
 

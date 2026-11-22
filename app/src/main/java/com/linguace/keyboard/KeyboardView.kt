@@ -15,6 +15,7 @@ import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.WindowInsets
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
@@ -59,6 +60,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         fun onSymbols()
         fun onLetters()
         fun onSuggestion(word: String)
+        fun onEmojiPanel()
+        fun onEmojiPage(page: String)
+        fun onEmojiPick(emoji: String)
     }
 
     /** Appelé quand la bande apparaît ou disparaît (zone visible modifiée). */
@@ -90,6 +94,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     var layout: Layout = Layouts.LATIN
         set(value) {
+            // Une autre page d'emoji repart du haut ; la même page garde sa place.
+            if (field.id != value.id) scrollY = 0f
             field = value
             requestLayout()
             invalidate()
@@ -127,7 +133,24 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     @Suppress("UNUSED_PARAMETER")
     private fun rowHeightOf(r: Int): Float =
-        if (layout.rows.size >= 5) compactRowHeight else rowHeight
+        if (layout.visibleRows >= 5) compactRowHeight else rowHeight
+
+    // ─── Défilement (grille des emoji) ──────────────────────────
+    /** Décalage vertical de la grille qui défile, en pixels. */
+    private var scrollY = 0f
+    private var scrolling = false
+    private var downY = 0f
+    private var scrollStart = 0f
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+
+    private val scrollTop: Float get() = stripSpace
+
+    /** Bas de la zone qui défile : juste avant la rangée fixe des onglets. */
+    private val scrollBottom: Float
+        get() = gap + stripSpace + Layout.VISIBLE_SCROLL_ROWS * rowHeightOf(0) - rowGap / 2
+
+    private val maxScroll: Float
+        get() = ((layout.scrollRows - Layout.VISIBLE_SCROLL_ROWS).coerceAtLeast(0)) * rowHeightOf(0)
 
     /** Écart horizontal entre deux touches. */
     private val gap = 5 * density
@@ -189,7 +212,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         color = hintColor
     }
 
-    private data class Placed(val key: Key, val rect: RectF)
+    /** [scrolls] : la touche fait partie de la grille qui défile. */
+    private data class Placed(val key: Key, val rect: RectF, val scrolls: Boolean = false)
 
     private var placed: List<Placed> = emptyList()
     private var pressed: Placed? = null
@@ -233,7 +257,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
-        val rows = layout.rows.indices.sumOf { rowHeightOf(it).toDouble() }.toFloat()
+        val rows = layout.visibleRows * rowHeightOf(0)
         // Bas de la dernière touche, puis la même marge qu'avant (validée par
         // l'auteur) jusqu'aux boutons du système.
         val lastKeyBottom = stripSpace + gap + rows - rowGap
@@ -261,17 +285,24 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
                 )
             }
         }
-        var top = gap + stripSpace
+        scrollY = scrollY.coerceIn(0f, maxScroll)
+        val h = rowHeightOf(0)
         layout.rows.forEachIndexed { r, row ->
+            val scrolls = r < layout.scrollRows
+            // Grille : décalée par le défilement ; rangées fixes : sous les
+            // rangées visibles de la grille.
+            val rowIndex = if (scrolls) r else r - layout.scrollRows +
+                layout.visibleRows - (layout.rows.size - layout.scrollRows)
+            val top = gap + stripSpace + rowIndex * h - (if (scrolls) scrollY else 0f)
+            // Hors de la zone visible : pas de touche (ni dessin, ni toucher).
+            if (scrolls && (top + h <= scrollTop || top >= scrollBottom)) return@forEachIndexed
             val rowUnits = row.sumOf { it.width.toDouble() }.toFloat()
             var x = gap / 2 + (layout.units - rowUnits) * unit / 2
-            val h = rowHeightOf(r)
             for (key in row) {
                 val w = key.width * unit
-                out += Placed(key, RectF(x + gap / 2, top, x + w - gap / 2, top + h - rowGap))
+                out += Placed(key, RectF(x + gap / 2, top, x + w - gap / 2, top + h - rowGap), scrolls)
                 x += w
             }
-            top += h
         }
         placed = out
     }
@@ -281,11 +312,19 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         // Fond seulement sous la partie visible : la bande vide reste transparente.
         fill.color = bgColor
         canvas.drawRect(0f, contentTop.toFloat(), width.toFloat(), height.toFloat(), fill)
-        for (p in placed) drawKey(canvas, p)
+        // La grille qui défile est rognée à sa zone ; le reste se dessine normalement.
+        for (p in placed) if (!p.scrolls) drawKey(canvas, p)
+        if (placed.any { it.scrolls }) {
+            canvas.save()
+            canvas.clipRect(0f, scrollTop, width.toFloat(), scrollBottom)
+            for (p in placed) if (p.scrolls) drawKey(canvas, p)
+            canvas.restore()
+        }
         popupKey?.let { drawPopup(canvas) }
     }
 
-    private fun isSpecial(k: Key) = k.type != KeyType.CHAR && k.type != KeyType.SPACE
+    private fun isSpecial(k: Key) =
+        k.type != KeyType.CHAR && k.type != KeyType.SPACE && k.type != KeyType.PICTO
 
     private fun drawSuggestion(canvas: Canvas, p: Placed) {
         if (p == pressed) {
@@ -362,12 +401,28 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         canvas.drawLine(x - d, cy + d, x + d, cy - d, icon)
     }
 
+    /** Un emoji : sans fond (comme Gboard), un fond seulement quand on l'appuie. */
+    private fun drawPicto(canvas: Canvas, p: Placed) {
+        if (p.key.label.isEmpty()) return
+        if (p == pressed) {
+            fill.color = pressedColor
+            canvas.drawRoundRect(p.rect, radius, radius, fill)
+        }
+        text.color = textColor
+        text.textSize = 24 * density
+        val y = p.rect.centerY() - (text.descent() + text.ascent()) / 2
+        canvas.drawText(p.key.label, p.rect.centerX(), y, text)
+    }
+
     private fun drawKey(canvas: Canvas, p: Placed) {
         val k = p.key
         if (k.type == KeyType.SUGGESTION) return drawSuggestion(canvas, p)
+        if (k.type == KeyType.PICTO) return drawPicto(canvas, p)
+        val activeTab = k.type == KeyType.PAGE && Emoji.pageOf(layout.id) == k.target
         fill.color = when {
             p == pressed && popupKey == null -> pressedColor
             k.type == KeyType.SHIFT && shift != ShiftState.OFF -> accent
+            activeTab -> accent
             isSpecial(k) -> specialColor
             else -> keyColor
         }
@@ -393,6 +448,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             // Symboles des touches de fonction : ⇧ ⌫ ↵ étaient trop petits.
             KeyType.SHIFT -> 26 * density
             KeyType.DELETE, KeyType.ENTER -> 24 * density
+            KeyType.PAGE, KeyType.EMOJI -> 19 * density
             else -> 16 * density
         }
         if (k.type == KeyType.SPACE) text.color = hintColor
@@ -453,9 +509,12 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
      * doit pas taper la lettre la plus proche).
      */
     private fun keyAt(x: Float, y: Float): Placed? {
-        placed.firstOrNull { it.rect.contains(x, y) }?.let { return it }
+        // Une touche de la grille à moitié sortie de la zone n'est touchable
+        // que dans la partie visible (sinon elle volerait les onglets).
+        val inArea = { p: Placed -> !p.scrolls || (y >= scrollTop && y < scrollBottom) }
+        placed.firstOrNull { it.rect.contains(x, y) && inArea(it) }?.let { return it }
         if (y < gap + stripSpace) return null
-        return placed.filter { it.key.type != KeyType.SUGGESTION }
+        return placed.filter { it.key.type != KeyType.SUGGESTION && inArea(it) }
             .minByOrNull { (it.rect.centerX() - x).let { d -> d * d } + (it.rect.centerY() - y).let { d -> d * d } }
     }
 
@@ -464,6 +523,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         longPressed = true
         when {
             p.key.type == KeyType.GLOBE -> listener.onGlobeLongPress()
+            p.key.longAction == KeyType.EMOJI -> listener.onEmojiPanel()
             p.key.popup.isNotEmpty() -> openPopup(p)
         }
         invalidate()
@@ -530,11 +590,12 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         repeating = false
         feedback(p.key)
         if (p.key.type == KeyType.DELETE) handler.postDelayed(repeat, 400)
-        if (p.key.popup.isNotEmpty() || p.key.type == KeyType.GLOBE) {
-            handler.postDelayed(longPress, 350)
-        }
+        if (hasLongPress(p.key)) handler.postDelayed(longPress, 350)
         invalidate()
     }
+
+    private fun hasLongPress(k: Key) =
+        k.popup.isNotEmpty() || k.type == KeyType.GLOBE || k.longAction != null
 
     /** Termine l'appui en cours : tape sa touche (ou la lettre choisie). */
     private fun release() {
@@ -562,6 +623,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
                 val i = e.actionIndex
                 val p = keyAt(e.getX(i), e.getY(i)) ?: return true
                 pointerId = e.getPointerId(i)
+                downY = e.getY(i)
+                scrollStart = scrollY
+                scrolling = false
                 press(p)
             }
             MotionEvent.ACTION_MOVE -> {
@@ -569,6 +633,21 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
                 if (i < 0) return true
                 val x = e.getX(i)
                 val y = e.getY(i)
+                // Grille des emoji : un glissement vertical la fait défiler ;
+                // l'emoji touché au départ n'est alors pas tapé.
+                if (layout.scrollRows > 0 && (scrolling || pressed?.scrolls == true) &&
+                    (scrolling || kotlin.math.abs(y - downY) > touchSlop)
+                ) {
+                    if (!scrolling) {
+                        scrolling = true
+                        handler.removeCallbacks(longPress)
+                        pressed = null
+                    }
+                    scrollY = (scrollStart - (y - downY)).coerceIn(0f, maxScroll)
+                    place()
+                    invalidate()
+                    return true
+                }
                 if (popupKey != null) {
                     val j = popupRects.indexOfFirst { x < it.second.right + gap / 2 }
                     val next = if (j == -1) popupRects.lastIndex else j
@@ -586,9 +665,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
                         handler.removeCallbacks(longPress)
                         handler.removeCallbacks(repeat)
                         pressed = p
-                        if (p.key.popup.isNotEmpty() || p.key.type == KeyType.GLOBE) {
-                            handler.postDelayed(longPress, 350)
-                        }
+                        if (hasLongPress(p.key)) handler.postDelayed(longPress, 350)
                         invalidate()
                     }
                 }
@@ -628,6 +705,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         KeyType.SYMBOLS -> listener.onSymbols()
         KeyType.LETTERS -> listener.onLetters()
         KeyType.SUGGESTION -> listener.onSuggestion(k.label)
+        KeyType.EMOJI -> listener.onEmojiPanel()
+        KeyType.PAGE -> listener.onEmojiPage(k.target)
+        KeyType.PICTO -> if (k.label.isNotEmpty()) listener.onEmojiPick(k.label) else Unit
     }
 
     override fun onDetachedFromWindow() {
@@ -672,6 +752,18 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             KeyType.SYMBOLS -> context.getString(R.string.key_symbols)
             KeyType.LETTERS -> context.getString(R.string.key_letters)
             KeyType.SUGGESTION -> context.getString(R.string.key_suggestion, k.label)
+            KeyType.EMOJI -> context.getString(R.string.key_emoji)
+            KeyType.PAGE -> context.getString(
+                when (k.target) {
+                    Emoji.RECENT -> R.string.emoji_recent
+                    "smileys" -> R.string.emoji_smileys
+                    "nature" -> R.string.emoji_nature
+                    "food" -> R.string.emoji_food
+                    "activities" -> R.string.emoji_activities
+                    else -> R.string.emoji_symbols
+                },
+            )
+            KeyType.PICTO -> k.label
         }
     }
 

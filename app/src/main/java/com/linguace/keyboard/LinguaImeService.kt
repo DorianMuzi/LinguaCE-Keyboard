@@ -241,6 +241,54 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         view?.layout = letters
     }
 
+    // ─── Emoji ──────────────────────────────────────────────────
+    private var recentEmoji: List<String> = emptyList()
+    private var emojiPage = Emoji.CATEGORIES.first().id
+    private val emojiLayouts = HashMap<String, Layout>()
+
+    override fun onEmojiPanel() {
+        recentEmoji = Emoji.parse(prefs.getString(RECENT_EMOJI_KEY, null))
+        // Les récents d'abord s'il y en a ; sinon la dernière catégorie regardée.
+        showEmojiPage(
+            if (recentEmoji.isNotEmpty()) Emoji.RECENT
+            else emojiPage.takeIf { it != Emoji.RECENT } ?: Emoji.firstPage(recentEmoji),
+        )
+    }
+
+    override fun onEmojiPage(page: String) = showEmojiPage(page)
+
+    private fun showEmojiPage(page: String) {
+        emojiPage = page
+        view?.layout = emojiLayout(page)
+    }
+
+    /**
+     * La page [page], sans les emoji que la police du téléphone ne sait pas
+     * dessiner (sur un téléphone ancien, ils s'afficheraient en carrés).
+     */
+    private fun emojiLayout(page: String): Layout {
+        if (page == Emoji.RECENT) return Emoji.layout(page, supported(recentEmoji))
+        return emojiLayouts.getOrPut(page) {
+            Emoji.layout(page, supported(Emoji.category(page)?.emojis.orEmpty()))
+        }
+    }
+
+    private val glyphPaint by lazy { android.graphics.Paint() }
+    private fun supported(list: List<String>) = list.filter { glyphPaint.hasGlyph(it) }
+
+    override fun onEmojiPick(emoji: String) {
+        val ic = currentInputConnection ?: return
+        // Un emoji ferme le mot en cours, comme un séparateur.
+        learnCurrentWord()
+        ic.commitText(emoji, 1)
+        if (learn) {
+            recentEmoji = Emoji.pushRecent(recentEmoji, emoji)
+            prefs.edit().putString(RECENT_EMOJI_KEY, Emoji.serialize(recentEmoji)).apply()
+        }
+        if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
+        scheduleRefresh()
+    }
+
     // ─── Après chaque touche ────────────────────────────────────
     // Majuscule automatique et suggestions demandent le texte au champ (un
     // aller-retour avec l'app) : on les fait juste après, une seule fois même
@@ -323,6 +371,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
             }
         }
         const val VIBRATE_KEY = "vibrate"
+        const val RECENT_EMOJI_KEY = "recent_emoji"
         const val THEME_KEY = "theme"
         const val HEIGHT_KEY = "key_height"
         const val AUTOCAPS_KEY = "autocaps"

@@ -33,6 +33,9 @@ class KeyboardAccessibilityTest {
         override fun onSymbols() { typed += "123" }
         override fun onLetters() {}
         override fun onSuggestion(word: String) { typed += "[$word]" }
+        override fun onEmojiPanel() { typed += "😊" }
+        override fun onEmojiPage(page: String) { typed += "page:$page" }
+        override fun onEmojiPick(emoji: String) { typed += emoji }
     }
 
     private fun onMain(block: () -> Unit) =
@@ -78,6 +81,31 @@ class KeyboardAccessibilityTest {
             assertTrue(node!!.second.isClickable)
             assertTrue(node.second.boundsInScreenNonEmpty())
         }
+    }
+
+    @Test
+    fun emojiPanel_isReadable_andKeysAreTyped() {
+        onMain { view.layout = Emoji.layout("smileys", Emoji.category("smileys")!!.emojis) }
+        val n = nodes()
+        // Seule la partie visible de la grille est exposée (3 rangées + onglets).
+        val visible = Layout.VISIBLE_SCROLL_ROWS * Emoji.COLUMNS + Emoji.TABS.size + 2
+        assertEquals(visible, n.size)
+        val (id, _) = n["😀"]!!
+        onMain { provider.performAction(id, AccessibilityNodeInfo.ACTION_CLICK, null) }
+        assertEquals(listOf("😀"), typed)
+        // Les onglets ont un nom lisible dans la langue du téléphone.
+        val food = n[desc(R.string.emoji_food)]!!.first
+        onMain { provider.performAction(food, AccessibilityNodeInfo.ACTION_CLICK, null) }
+        assertEquals("page:food", typed.last())
+    }
+
+    @Test
+    fun symbols_haveAnEmojiKey() {
+        onMain { view.layout = Layouts.SYMBOLS }
+        val key = nodes()[desc(R.string.key_emoji)]
+        assertNotNull(key)
+        onMain { provider.performAction(key!!.first, AccessibilityNodeInfo.ACTION_CLICK, null) }
+        assertEquals(listOf("😊"), typed)
     }
 
     @Test

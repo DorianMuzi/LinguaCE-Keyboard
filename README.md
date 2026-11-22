@@ -43,6 +43,15 @@ d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
 **🌐** passe du latin au cyrillique ; un appui long sur 🌐 ouvre le choix du
 clavier système. **⇧** : une majuscule ; deux appuis : verrouillage.
 
+## Emoji
+
+Appui long sur la virgule (ou la touche 😊 du clavier de symboles) : le panneau
+des emoji, avec une grille qui défile, des onglets (récents, smileys, animaux et
+nature, nourriture, activités / voyages / objets, symboles) et ⌫. Les emoji que
+la police du téléphone ne sait pas dessiner sont écartés. Les récents restent
+sur le téléphone, comme les mots appris (rien n'est mémorisé dans les champs de
+mot de passe, d'adresse ou en navigation privée).
+
 ## Réglages
 
 Dans l'app LinguaCE Keyboard : disposition latine (QWERTY / AZERTY), **thème**

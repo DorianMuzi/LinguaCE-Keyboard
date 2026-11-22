@@ -44,6 +44,13 @@
     <string name="set_height_large">Large</string>
     <string name="set_autocaps">Capital letter at the start of a sentence</string>
     <string name="set_double_space">Double space types a full stop</string>
+    <string name="key_emoji">Emoji</string>
+    <string name="emoji_recent">Recent emoji</string>
+    <string name="emoji_smileys">Smileys and people</string>
+    <string name="emoji_nature">Animals and nature</string>
+    <string name="emoji_food">Food and drink</string>
+    <string name="emoji_activities">Activities, travel and objects</string>
+    <string name="emoji_symbols">Symbols</string>
     <string name="setup_dictionary">Personal dictionary (%1$d)</string>
     <string name="dict_title">Personal dictionary</string>
     <string name="dict_intro">Words the keyboard has learned from you, most used first. Delete the ones you do not want suggested, or add your own (names, places…).</string>
