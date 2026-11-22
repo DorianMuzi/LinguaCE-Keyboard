@@ -8,3 +8,8 @@ local.properties
 captures/
 .kotlin/
 dist/
+
+# Clé de signature de publication : JAMAIS sur GitHub.
+keystore.properties
+*.jks
+*.keystore

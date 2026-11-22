@@ -104,6 +104,31 @@ adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb shell am instrument -w com.linguace.keyboard.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
+## Publier (Google Play)
+
+Google Play demande un fichier `.aab` signé avec une clé de dépôt. Cette clé reste
+sur le poste de la personne qui publie et n'entre **jamais** dans Git
+(`keystore.properties` et `*.jks` sont ignorés).
+
+1. Créer la clé (une seule fois ; `keytool` demande les mots de passe) :
+   ```
+   keytool -genkeypair -v -keystore linguace-release.jks -alias linguace -keyalg RSA -keysize 4096 -validity 10000
+   ```
+2. Créer `keystore.properties` à la racine :
+   ```
+   storeFile=linguace-release.jks
+   storePassword=…
+   keyAlias=linguace
+   keyPassword=…
+   ```
+3. `gradlew bundleRelease` → `app/build/outputs/bundle/release/app-release.aab`.
+   Sans `keystore.properties`, la version « release » est signée avec la clé de
+   débogage : utile pour la tester sur l'émulateur, refusée par Google Play.
+
+Les textes de la fiche (FR / EN / RU) sont dans [`store/`](store) et la
+[politique de confidentialité](PRIVACY.md) est la page à indiquer à Google Play.
+À chaque nouvelle publication, augmenter `versionCode` dans `app/build.gradle.kts`.
+
 ## Licence
 
 [Apache 2.0](LICENSE). Le système de translittération Chechen Latin Script et
