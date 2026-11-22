@@ -2,7 +2,8 @@
 # Mots courants validés par l'auteur, en latin et en cyrillique.
 # Format : mot<TAB>poids (plus le poids est grand, plus le mot passe devant).
 # Les mots que l'utilisateur tape s'y ajoutent, sur son téléphone seulement.
-# BROUILLON — en attente de l'accord de l'auteur avant publication.
+# Approuvée par l'auteur le 2026-11-22. Vérifiée à chaque build par SeedListTest
+# (graphie, palotchka, doublons, format).
 
 # Politesse et salutations
 salam	60

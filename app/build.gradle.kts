@@ -32,6 +32,12 @@ android {
     }
 }
 
+// SeedListTest lit la liste de base : toute modification de la liste doit
+// relancer les tests (sinon Gradle les croit à jour et ne vérifie rien).
+tasks.withType<Test>().configureEach {
+    inputs.file("src/main/assets/seed_words.tsv")
+}
+
 // Aucune dépendance d'exécution : le clavier ne contient que son propre code,
 // lisible ligne à ligne. Les bibliothèques ci-dessous ne servent qu'aux tests
 // (sur le poste et sur l'émulateur) et n'entrent pas dans l'APK.
