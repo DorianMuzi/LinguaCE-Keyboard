@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LinguaCE Keyboard</string>
+    <string name="app_name" translatable="false">LinguaCE Keyboard</string>
     <string name="ime_name">LinguaCE — Chechen</string>
     <!-- Comme Gboard : la langue écrite dans la langue elle-même, sur tous les téléphones. -->
     <string name="subtype_ce" translatable="false">Noxçiyŋ · Нохчийн</string>
@@ -23,7 +23,6 @@
     <string name="setup_privacy">This keyboard has no internet access: what you type never leaves your phone.</string>
     <string name="key_suggestion">Suggestion: %1$s</string>
     <string name="setup_learning">Suggestions: words you type are remembered on this phone only, to suggest them again. They are never sent.</string>
-    <string name="setup_clear">Erase learned words (%1$d)</string>
     <string name="setup_cleared">Learned words erased.</string>
     <string name="share_explain">You can send us the Chechen words you use, to enrich the suggestions for everyone. You choose the words, then send them yourself: the keyboard sends nothing on its own.</string>
     <string name="share_button">Suggest my words to LinguaCE</string>
@@ -41,7 +40,7 @@
     <string name="dict_add_hint">Search or add a word…</string>
     <string name="dict_add">Add</string>
     <string name="dict_empty">No word yet.</string>
-    <string name="dict_uses">%1$d×</string>
+    <string name="dict_uses" translatable="false">%1$d×</string>
     <string name="dict_delete">Delete “%1$s”</string>
     <string name="dict_added">“%1$s” added.</string>
     <string name="dict_invalid">A word has at least two letters, with no digits or symbols.</string>

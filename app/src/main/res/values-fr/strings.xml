@@ -20,7 +20,6 @@
     <string name="setup_privacy">Ce clavier n\'a pas accès à Internet : ce que tu tapes ne quitte jamais ton téléphone.</string>
     <string name="key_suggestion">Suggestion : %1$s</string>
     <string name="setup_learning">Suggestions : les mots que tu tapes sont retenus sur ce téléphone seulement, pour te les proposer ensuite. Ils ne sont jamais envoyés.</string>
-    <string name="setup_clear">Effacer les mots appris (%1$d)</string>
     <string name="setup_cleared">Mots appris effacés.</string>
     <string name="share_explain">Tu peux nous envoyer les mots tchétchènes que tu utilises, pour enrichir les suggestions de tous. Tu choisis les mots, puis tu les envoies toi-même : le clavier, lui, n\'envoie rien.</string>
     <string name="share_button">Proposer mes mots à LinguaCE</string>
@@ -38,7 +37,6 @@
     <string name="dict_add_hint">Chercher ou ajouter un mot…</string>
     <string name="dict_add">Ajouter</string>
     <string name="dict_empty">Aucun mot pour l\'instant.</string>
-    <string name="dict_uses">%1$d×</string>
     <string name="dict_delete">Supprimer « %1$s »</string>
     <string name="dict_added">« %1$s » ajouté.</string>
     <string name="dict_invalid">Un mot : au moins deux lettres, sans chiffre ni symbole.</string>

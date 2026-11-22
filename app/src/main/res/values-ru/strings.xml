@@ -19,7 +19,6 @@
     <string name="setup_privacy">У этой клавиатуры нет доступа к интернету: то, что вы печатаете, никогда не покидает телефон.</string>
     <string name="key_suggestion">Подсказка: %1$s</string>
     <string name="setup_learning">Подсказки: слова, которые вы печатаете, запоминаются только на этом телефоне, чтобы предлагать их снова. Они никуда не отправляются.</string>
-    <string name="setup_clear">Стереть выученные слова (%1$d)</string>
     <string name="setup_cleared">Выученные слова стёрты.</string>
     <string name="share_explain">Вы можете прислать нам чеченские слова, которые используете, чтобы улучшить подсказки для всех. Вы сами выбираете слова и отправляете их: клавиатура ничего не отправляет сама.</string>
     <string name="share_button">Предложить мои слова LinguaCE</string>
@@ -37,7 +36,6 @@
     <string name="dict_add_hint">Найти или добавить слово…</string>
     <string name="dict_add">Добавить</string>
     <string name="dict_empty">Пока нет слов.</string>
-    <string name="dict_uses">%1$d×</string>
     <string name="dict_delete">Удалить «%1$s»</string>
     <string name="dict_added">«%1$s» добавлено.</string>
     <string name="dict_invalid">Слово — минимум две буквы, без цифр и символов.</string>

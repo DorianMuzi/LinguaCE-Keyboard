@@ -27,7 +27,6 @@
     <!-- Suggestions de mots : À VALIDER par l'auteur (rédigé en cyrillique, Dico3). -->
     <string name="key_suggestion">Ẋexam: %1$s</string>
     <string name="setup_learning">Ẋexamaş: aẋ yazdina deşnaş qu telefoneẋ beŋ ca düsu, yuxa ẋaxo. Üş cẋanẋa a dja ca doxüytu.</string>
-    <string name="setup_clear">Jamiyna deşnaş djadakqa (%1$d)</string>
     <string name="setup_cleared">Jamiyna deşnaş djadäxna.</string>
 
     <!-- Proposer ses mots : À VALIDER par l'auteur (rédigé en cyrillique, Dico3). -->
@@ -38,4 +37,19 @@
     <string name="share_none">Hinca a kerla jamiyna deşnaş dac.</string>
     <string name="share_subject">LinguaCE-na djadaxiytina deşnaş</string>
     <string name="share_intro">As leloş dolu noxçiyŋ deşnaş, LinguaCE klaviaturina:</string>
+    <!-- Réglages et dictionnaire personnel : À VALIDER par l'auteur (cyrillique → Dico3). -->
+    <string name="set_sound">Hora klavişa ṫetajiyça az</string>
+    <string name="set_vibrate">Hora klavişa ṫetajiyça vibraci</string>
+    <string name="set_latin_layout">Latinaŋ raskladka</string>
+    <string name="setup_dictionary">Ẋaŋ doşam (%1$d)</string>
+    <string name="dict_title">Ẋaŋ doşam</string>
+    <string name="dict_intro">Klaviaturas ẋögara jamiyna deşnaş, duqa leliynarş ẋalxa. Ẋexam ca öşu deşnaş djadakqa, ya ẋayŋ deşnaş ṫetoxa (ċerş, mettigaş…).</string>
+    <string name="dict_add_hint">Doş laxa ya ṫetoxa…</string>
+    <string name="dict_add">Ṫetoxa</string>
+    <string name="dict_empty">Hinca a doş dac.</string>
+    <string name="dict_delete">«%1$s» djadakqa</string>
+    <string name="dict_added">«%1$s» ṫetöxna.</string>
+    <string name="dict_invalid">Deşaŋ şiə elp muq̇ane a xila deza, teraẋ a, bilgalo a yocuş.</string>
+    <string name="dict_clear_all">Masso a djadakqa</string>
+    <string name="dict_clear_confirm">Masso a jamiyna deşnaş djadakqiy?</string>
 </resources>
