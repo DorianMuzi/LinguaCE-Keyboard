@@ -76,4 +76,19 @@
     <string name="emoji_food">Yaa huma a, malarş a</string>
     <string name="emoji_activities">Ġullaqaş, neq̇aş, humanaş</string>
     <string name="emoji_symbols">Bilgalonaş</string>
+
+    <!-- Thème, hauteur des touches, majuscule auto, double espace (liste de
+         l'auteur, 2026-11-22). Titres ci-dessus ; variantes écartées : Bodane,
+         Normalaŋ, Smaylik. -->
+    <string name="set_theme">Tema</string>
+    <string name="set_theme_system">Telefoneẋ sanna</string>
+    <string name="set_theme_light">Sirla</string>
+    <string name="set_theme_dark">Boda</string>
+    <string name="set_key_height">Klavişiyŋ loqalla</string>
+    <string name="set_height_small">Loxa</string>
+    <string name="set_height_normal">Yuq̇ara</string>
+    <string name="set_height_large">Leqa</string>
+    <string name="set_autocaps">Qerstamaŋ yüxẋeẋ dokqa elp</string>
+    <string name="set_double_space">Şozza probel — ṫadam</string>
+    <string name="key_emoji">Emodƶi</string>
 </resources>
