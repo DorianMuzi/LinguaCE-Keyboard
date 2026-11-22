@@ -31,6 +31,13 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
     private var suggest = true
     private var learn = true
 
+    /** Double espace → point dans ce champ (texte libre, pas une adresse). */
+    private var punctuate = true
+
+    /** Réglages lus à chaque ouverture du clavier. */
+    private var autoCaps = true
+    private var doubleSpace = true
+
     override fun onCreate() {
         super.onCreate()
         letters = Layouts.byId(prefs.getString("layout", null), isAzerty(this))
@@ -82,6 +89,10 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         view?.showStrip = suggest
         view?.soundOn = prefs.getBoolean(SOUND_KEY, false)
         view?.vibrateOn = prefs.getBoolean(VIBRATE_KEY, true)
+        view?.theme = Theme.of(prefs.getString(THEME_KEY, null))
+        view?.heightScale = KeyHeight.of(prefs.getString(HEIGHT_KEY, null)).scale
+        autoCaps = prefs.getBoolean(AUTOCAPS_KEY, true)
+        doubleSpace = prefs.getBoolean(DOUBLE_SPACE_KEY, true)
         scheduleRefresh()
     }
 
@@ -128,6 +139,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         )
         val incognito = (info?.imeOptions ?: 0) and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING != 0
         learn = suggest && !address && !incognito
+        punctuate = suggest && !address
     }
 
     // ─── Saisie ─────────────────────────────────────────────────
@@ -137,7 +149,17 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         if (text.none { it.isLetter() || Character.getType(it) == Character.NON_SPACING_MARK.toInt() }) {
             learnCurrentWord()
         }
-        ic.commitText(text, 1)
+        if (text == " " && doubleSpace && punctuate &&
+            TextRules.doubleSpaceToPeriod(ic.getTextBeforeCursor(4, 0) ?: "")
+        ) {
+            // « mot␣ » + espace → « mot.␣ »
+            ic.beginBatchEdit()
+            ic.deleteSurroundingText(1, 0)
+            ic.commitText(". ", 1)
+            ic.endBatchEdit()
+        } else {
+            ic.commitText(text, 1)
+        }
         if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
         scheduleRefresh()
     }
@@ -270,6 +292,8 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
     private fun autoShift() {
         val v = view ?: return
         if (v.shift == ShiftState.LOCKED) return
+        // Réglage désactivé : la majuscule ne vient que de ⇧.
+        if (!autoCaps) return
         val info = currentInputEditorInfo ?: return
         val ic = currentInputConnection ?: return
         val type = info.inputType
@@ -299,6 +323,10 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
             }
         }
         const val VIBRATE_KEY = "vibrate"
+        const val THEME_KEY = "theme"
+        const val HEIGHT_KEY = "key_height"
+        const val AUTOCAPS_KEY = "autocaps"
+        const val DOUBLE_SPACE_KEY = "double_space"
         private const val MAX_WORD = 48
 
         /** Efface les mots appris (écran d'installation). */

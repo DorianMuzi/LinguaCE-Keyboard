@@ -43,6 +43,13 @@ d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
 **🌐** passe du latin au cyrillique ; un appui long sur 🌐 ouvre le choix du
 clavier système. **⇧** : une majuscule ; deux appuis : verrouillage.
 
+## Réglages
+
+Dans l'app LinguaCE Keyboard : disposition latine (QWERTY / AZERTY), **thème**
+(comme le téléphone / clair / sombre), **hauteur des touches** (petite /
+normale / grande), son et vibration, **majuscule en début de phrase**,
+**double espace pour un point**. Tout reste sur le téléphone.
+
 ## Accessibilité
 
 Le clavier fonctionne avec **TalkBack** : chaque touche a un nom lu dans la

@@ -75,26 +75,58 @@ class SetupActivity : Activity() {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
         }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(16) })
 
-        // Disposition latine : QWERTY ou AZERTY (comme dans Gboard).
         val prefs = getSharedPreferences("keyboard", Context.MODE_PRIVATE)
-        column.addView(text(R.string.set_latin_layout, 16f).apply { setPadding(0, dp(16), 0, dp(4)) })
-        column.addView(RadioGroup(this).apply {
-            orientation = RadioGroup.HORIZONTAL
-            val azerty = LinguaImeService.isAzerty(this@SetupActivity)
-            for ((label, value) in listOf("QWERTY" to "qwerty", "AZERTY" to "azerty")) {
-                addView(RadioButton(this@SetupActivity).apply {
-                    id = View.generateViewId()
-                    text = label
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    minHeight = dp(48)
-                    setPadding(dp(4), 0, dp(24), 0)
-                    isChecked = (value == "azerty") == azerty
-                    setOnCheckedChangeListener { _, on ->
-                        if (on) prefs.edit().putString(LinguaImeService.LATIN_KEY, value).apply()
-                    }
-                })
-            }
-        })
+
+        /**
+         * Un réglage à choix unique : titre puis boutons radio. Deux choix
+         * tiennent sur une ligne ; trois se mettent l'un sous l'autre (les
+         * libellés russes sont longs).
+         */
+        fun choice(title: Int, key: String, current: String, options: List<Pair<CharSequence, String>>) {
+            column.addView(text(title, 16f).apply { setPadding(0, dp(16), 0, dp(4)) })
+            column.addView(RadioGroup(this).apply {
+                orientation = if (options.size > 2) RadioGroup.VERTICAL else RadioGroup.HORIZONTAL
+                for ((label, value) in options) {
+                    addView(RadioButton(this@SetupActivity).apply {
+                        id = View.generateViewId()
+                        text = label
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                        minHeight = dp(48)
+                        setPadding(dp(4), 0, dp(24), 0)
+                        isChecked = value == current
+                        setOnCheckedChangeListener { _, on ->
+                            if (on) prefs.edit().putString(key, value).apply()
+                        }
+                    })
+                }
+            })
+        }
+
+        // Disposition latine : QWERTY ou AZERTY (comme dans Gboard).
+        choice(
+            R.string.set_latin_layout, LinguaImeService.LATIN_KEY,
+            if (LinguaImeService.isAzerty(this)) "azerty" else "qwerty",
+            listOf("QWERTY" to "qwerty", "AZERTY" to "azerty"),
+        )
+        // Thème et hauteur des touches (comme dans Gboard).
+        choice(
+            R.string.set_theme, LinguaImeService.THEME_KEY,
+            Theme.of(prefs.getString(LinguaImeService.THEME_KEY, null)).name.lowercase(),
+            listOf(
+                getText(R.string.set_theme_system) to "system",
+                getText(R.string.set_theme_light) to "light",
+                getText(R.string.set_theme_dark) to "dark",
+            ),
+        )
+        choice(
+            R.string.set_key_height, LinguaImeService.HEIGHT_KEY,
+            KeyHeight.of(prefs.getString(LinguaImeService.HEIGHT_KEY, null)).name.lowercase(),
+            listOf(
+                getText(R.string.set_height_small) to "small",
+                getText(R.string.set_height_normal) to "normal",
+                getText(R.string.set_height_large) to "large",
+            ),
+        )
 
         // Son et vibration à chaque touche (comme les options de Gboard).
         fun toggle(label: Int, key: String, default: Boolean) = Switch(this).apply {
@@ -109,6 +141,8 @@ class SetupActivity : Activity() {
             LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(16) },
         )
         column.addView(toggle(R.string.set_vibrate, LinguaImeService.VIBRATE_KEY, true))
+        column.addView(toggle(R.string.set_autocaps, LinguaImeService.AUTOCAPS_KEY, true))
+        column.addView(toggle(R.string.set_double_space, LinguaImeService.DOUBLE_SPACE_KEY, true))
 
         column.addView(text(R.string.setup_privacy, 14f).apply { setPadding(0, dp(24), 0, dp(8)) })
 

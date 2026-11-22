@@ -30,6 +30,16 @@
     <string name="set_sound">Звук при нажатии</string>
     <string name="set_vibrate">Вибрация при нажатии</string>
     <string name="set_latin_layout">Латинская раскладка</string>
+    <string name="set_theme">Тема</string>
+    <string name="set_theme_system">Как в телефоне</string>
+    <string name="set_theme_light">Светлая</string>
+    <string name="set_theme_dark">Тёмная</string>
+    <string name="set_key_height">Высота клавиш</string>
+    <string name="set_height_small">Низкая</string>
+    <string name="set_height_normal">Обычная</string>
+    <string name="set_height_large">Высокая</string>
+    <string name="set_autocaps">Заглавная буква в начале предложения</string>
+    <string name="set_double_space">Точка двойным пробелом</string>
     <string name="setup_dictionary">Личный словарь (%1$d)</string>
     <string name="dict_title">Личный словарь</string>
     <string name="dict_intro">Слова, которые клавиатура выучила у вас, — сначала самые частые. Удалите те, которые не хотите видеть в подсказках, или добавьте свои (имена, места…).</string>

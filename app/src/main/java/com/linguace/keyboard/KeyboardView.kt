@@ -24,6 +24,24 @@ import android.widget.Button
 
 enum class ShiftState { OFF, ONCE, LOCKED }
 
+/** Thème du clavier (réglage « Thème »). */
+enum class Theme {
+    SYSTEM, LIGHT, DARK;
+
+    companion object {
+        fun of(pref: String?): Theme = entries.firstOrNull { it.name.equals(pref, true) } ?: SYSTEM
+    }
+}
+
+/** Hauteur des touches (réglage « Hauteur des touches »). */
+enum class KeyHeight(val scale: Float) {
+    SMALL(0.88f), NORMAL(1f), LARGE(1.12f);
+
+    companion object {
+        fun of(pref: String?): KeyHeight = entries.firstOrNull { it.name.equals(pref, true) } ?: NORMAL
+    }
+}
+
 /**
  * Le clavier, dessiné par une seule vue : rapide, et maîtrise complète de
  * l'appui long (lettres dérivées) et de la répétition de ⌫.
@@ -93,8 +111,19 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
      * donc 10 dp entre deux rangées — on touche moins souvent la rangée d'à
      * côté. 42 dp si une disposition avait 5 rangées.
      */
-    private val compactRowHeight = 42 * density
-    private val rowHeight = 50 * density
+    private val compactRowHeight get() = 42 * density * heightScale
+    private val rowHeight get() = 50 * density * heightScale
+
+    /**
+     * Réglage « Hauteur des touches » : 0,88 (petite), 1 (normale), 1,12
+     * (grande). Seule la hauteur des rangées change, les écarts restent.
+     */
+    var heightScale = 1f
+        set(value) {
+            if (field == value) return
+            field = value
+            requestLayout()
+        }
 
     @Suppress("UNUSED_PARAMETER")
     private fun rowHeightOf(r: Int): Float =
@@ -123,17 +152,33 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     val contentTop: Int
         get() = if (suggestions.isEmpty()) stripSpace.toInt() else 0
 
-    private val dark =
-        (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
-            Configuration.UI_MODE_NIGHT_YES
+    /**
+     * Réglage « Thème » : [Theme.SYSTEM] suit le téléphone (clair le jour,
+     * sombre la nuit si le téléphone le fait), sinon toujours clair ou sombre.
+     */
+    var theme: Theme = Theme.SYSTEM
+        set(value) {
+            if (field == value) return
+            field = value
+            invalidate()
+        }
+
+    private val dark: Boolean
+        get() = when (theme) {
+            Theme.LIGHT -> false
+            Theme.DARK -> true
+            Theme.SYSTEM ->
+                (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                    Configuration.UI_MODE_NIGHT_YES
+        }
 
     // Couleurs LinguaCE (bleu nuit / bleu accent).
-    private val bgColor = if (dark) 0xFF0A1628.toInt() else 0xFFE3E8EF.toInt()
-    private val keyColor = if (dark) 0xFF1B2C45.toInt() else 0xFFFFFFFF.toInt()
-    private val specialColor = if (dark) 0xFF12213A.toInt() else 0xFFC7D0DC.toInt()
-    private val pressedColor = if (dark) 0xFF2B4266.toInt() else 0xFFB4C2D6.toInt()
-    private val textColor = if (dark) 0xFFF2F5FA.toInt() else 0xFF0A1628.toInt()
-    private val hintColor = if (dark) 0xFF7F93B0.toInt() else 0xFF6B7C93.toInt()
+    private val bgColor get() = if (dark) 0xFF0A1628.toInt() else 0xFFE3E8EF.toInt()
+    private val keyColor get() = if (dark) 0xFF1B2C45.toInt() else 0xFFFFFFFF.toInt()
+    private val specialColor get() = if (dark) 0xFF12213A.toInt() else 0xFFC7D0DC.toInt()
+    private val pressedColor get() = if (dark) 0xFF2B4266.toInt() else 0xFFB4C2D6.toInt()
+    private val textColor get() = if (dark) 0xFFF2F5FA.toInt() else 0xFF0A1628.toInt()
+    private val hintColor get() = if (dark) 0xFF7F93B0.toInt() else 0xFF6B7C93.toInt()
     private val accent = 0xFF1E88E5.toInt()
 
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -365,6 +410,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         // Indices d'appui long : la lettre dérivée en haut à droite, le chiffre
         // (rangée du haut, comme Gboard) en haut à gauche.
         hint.textSize = (if (latin) 9f else 10f) * density
+        hint.color = hintColor
         val hintY = p.rect.top + (if (latin) 10.5f else 12f) * density
         k.variant?.let { v ->
             hint.textAlign = Paint.Align.RIGHT

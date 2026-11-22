@@ -34,6 +34,16 @@
     <string name="set_sound">Sound on each key</string>
     <string name="set_vibrate">Vibrate on each key</string>
     <string name="set_latin_layout">Latin layout</string>
+    <string name="set_theme">Theme</string>
+    <string name="set_theme_system">Same as the phone</string>
+    <string name="set_theme_light">Light</string>
+    <string name="set_theme_dark">Dark</string>
+    <string name="set_key_height">Key height</string>
+    <string name="set_height_small">Small</string>
+    <string name="set_height_normal">Normal</string>
+    <string name="set_height_large">Large</string>
+    <string name="set_autocaps">Capital letter at the start of a sentence</string>
+    <string name="set_double_space">Double space types a full stop</string>
     <string name="setup_dictionary">Personal dictionary (%1$d)</string>
     <string name="dict_title">Personal dictionary</string>
     <string name="dict_intro">Words the keyboard has learned from you, most used first. Delete the ones you do not want suggested, or add your own (names, places…).</string>
