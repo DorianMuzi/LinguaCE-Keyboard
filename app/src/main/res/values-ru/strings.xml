@@ -40,6 +40,15 @@
     <string name="set_height_large">Высокая</string>
     <string name="set_autocaps">Заглавная буква в начале предложения</string>
     <string name="set_double_space">Точка двойным пробелом</string>
+    <string name="section_layout">РАСКЛАДКА</string>
+    <string name="section_appearance">ВНЕШНИЙ ВИД</string>
+    <string name="section_typing">НАБОР ТЕКСТА</string>
+    <string name="section_privacy">КОНФИДЕНЦИАЛЬНОСТЬ</string>
+    <string name="setup_tips">Советы</string>
+    <string name="set_toolbar">Панель инструментов (настройки, эмодзи, отмена, вставка)</string>
+    <string name="tool_settings">Настройки клавиатуры</string>
+    <string name="tool_undo">Отменить</string>
+    <string name="tool_paste">Вставить</string>
     <string name="key_emoji">Эмодзи</string>
     <string name="emoji_recent">Недавние эмодзи</string>
     <string name="emoji_smileys">Смайлики и люди</string>

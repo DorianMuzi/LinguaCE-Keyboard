@@ -22,10 +22,16 @@ import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 
-/** Écran d'installation : activer le clavier, le choisir, l'essayer, le régler. */
+/**
+ * Écran d'accueil : activer le clavier, le choisir, l'essayer, puis les
+ * réglages rangés en quatre sections (Disposition, Apparence, Saisie,
+ * Confidentialité).
+ */
 class SetupActivity : Activity() {
 
     private lateinit var dictionaryButton: Button
+    private lateinit var enableButton: Button
+    private lateinit var chooseButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,11 +40,22 @@ class SetupActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(pad, pad, pad, pad)
         }
-        fun text(res: Int, size: Float) = TextView(this).apply {
-            setText(res)
+        fun text(s: CharSequence, size: Float) = TextView(this).apply {
+            text = s
             setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
             setPadding(0, 0, 0, dp(16))
         }
+        fun text(res: Int, size: Float) = text(getText(res), size)
+
+        /** Titre de section, dans la couleur d'accent du clavier. */
+        fun section(res: Int) = column.addView(TextView(this).apply {
+            setText(res)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(ACCENT)
+            letterSpacing = 0.04f
+            setPadding(0, dp(28), 0, dp(4))
+        })
 
         // En-tête : l'icône du clavier et son nom (pas de barre de titre système).
         column.addView(LinearLayout(this).apply {
@@ -58,18 +75,42 @@ class SetupActivity : Activity() {
         })
 
         column.addView(text(R.string.setup_title, 24f))
-        column.addView(text(R.string.setup_intro, 16f))
-        column.addView(Button(this).apply {
+
+        // Une phrase d'abord ; les astuces (les puces) se déplient à la demande.
+        val intro = getString(R.string.setup_intro).split("\n\n", limit = 2)
+        column.addView(text(intro[0], 16f))
+        if (intro.size > 1) {
+            val tips = text(intro[1], 15f).apply { visibility = View.GONE }
+            val label = getString(R.string.setup_tips)
+            column.addView(TextView(this).apply {
+                this.text = "$label ▾"
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+                setTextColor(ACCENT)
+                setTypeface(typeface, Typeface.BOLD)
+                minHeight = dp(48)
+                gravity = Gravity.CENTER_VERTICAL
+                setOnClickListener {
+                    val open = tips.visibility != View.VISIBLE
+                    tips.visibility = if (open) View.VISIBLE else View.GONE
+                    this.text = "$label ${if (open) "▴" else "▾"}"
+                }
+            })
+            column.addView(tips)
+        }
+
+        enableButton = Button(this).apply {
             setText(R.string.setup_enable)
             setOnClickListener { startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)) }
-        })
-        column.addView(Button(this).apply {
+        }
+        chooseButton = Button(this).apply {
             setText(R.string.setup_choose)
             setOnClickListener {
                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                     .showInputMethodPicker()
             }
-        })
+        }
+        column.addView(enableButton)
+        column.addView(chooseButton)
         column.addView(EditText(this).apply {
             setHint(R.string.setup_try)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
@@ -83,7 +124,7 @@ class SetupActivity : Activity() {
          * libellés russes sont longs).
          */
         fun choice(title: Int, key: String, current: String, options: List<Pair<CharSequence, String>>) {
-            column.addView(text(title, 16f).apply { setPadding(0, dp(16), 0, dp(4)) })
+            column.addView(text(title, 16f).apply { setPadding(0, dp(12), 0, dp(4)) })
             column.addView(RadioGroup(this).apply {
                 orientation = if (options.size > 2) RadioGroup.VERTICAL else RadioGroup.HORIZONTAL
                 for ((label, value) in options) {
@@ -102,13 +143,24 @@ class SetupActivity : Activity() {
             })
         }
 
-        // Disposition latine : QWERTY ou AZERTY (comme dans Gboard).
+        fun toggle(label: Int, key: String, default: Boolean) = Switch(this).apply {
+            setText(label)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            isChecked = prefs.getBoolean(key, default)
+            minHeight = dp(48)
+            setOnCheckedChangeListener { _, on -> prefs.edit().putBoolean(key, on).apply() }
+        }
+
+        // ─── Disposition ───
+        section(R.string.section_layout)
         choice(
             R.string.set_latin_layout, LinguaImeService.LATIN_KEY,
             if (LinguaImeService.isAzerty(this)) "azerty" else "qwerty",
             listOf("QWERTY" to "qwerty", "AZERTY" to "azerty"),
         )
-        // Thème et hauteur des touches (comme dans Gboard).
+
+        // ─── Apparence ───
+        section(R.string.section_appearance)
         choice(
             R.string.set_theme, LinguaImeService.THEME_KEY,
             Theme.of(prefs.getString(LinguaImeService.THEME_KEY, null)).name.lowercase(),
@@ -127,28 +179,24 @@ class SetupActivity : Activity() {
                 getText(R.string.set_height_large) to "large",
             ),
         )
-
-        // Son et vibration à chaque touche (comme les options de Gboard).
-        fun toggle(label: Int, key: String, default: Boolean) = Switch(this).apply {
-            setText(label)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-            isChecked = prefs.getBoolean(key, default)
-            minHeight = dp(48)
-            setOnCheckedChangeListener { _, on -> prefs.edit().putBoolean(key, on).apply() }
-        }
         column.addView(
-            toggle(R.string.set_sound, LinguaImeService.SOUND_KEY, false),
-            LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(16) },
+            toggle(R.string.set_toolbar, LinguaImeService.TOOLBAR_KEY, true),
+            LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(8) },
         )
+
+        // ─── Saisie ───
+        section(R.string.section_typing)
+        column.addView(toggle(R.string.set_sound, LinguaImeService.SOUND_KEY, false))
         column.addView(toggle(R.string.set_vibrate, LinguaImeService.VIBRATE_KEY, true))
         column.addView(toggle(R.string.set_autocaps, LinguaImeService.AUTOCAPS_KEY, true))
         column.addView(toggle(R.string.set_double_space, LinguaImeService.DOUBLE_SPACE_KEY, true))
 
-        column.addView(text(R.string.setup_privacy, 14f).apply { setPadding(0, dp(24), 0, dp(8)) })
-
-        // Suggestions : les mots appris restent sur le téléphone. Le
-        // dictionnaire personnel permet de les voir, les supprimer un par un,
-        // en ajouter, les proposer au projet ou tout effacer.
+        // ─── Confidentialité ───
+        // Les mots appris restent sur le téléphone. Le dictionnaire personnel
+        // permet de les voir, les supprimer un par un, en ajouter, les
+        // proposer au projet ou tout effacer.
+        section(R.string.section_privacy)
+        column.addView(text(R.string.setup_privacy, 14f).apply { setPadding(0, dp(8), 0, dp(8)) })
         column.addView(text(R.string.setup_learning, 14f))
         dictionaryButton = Button(this).apply {
             setOnClickListener {
@@ -170,7 +218,22 @@ class SetupActivity : Activity() {
         // Le nombre de mots a pu changer dans le dictionnaire.
         dictionaryButton.text =
             getString(R.string.setup_dictionary, LinguaImeService.learnedCount(this))
+        refreshSteps()
+    }
+
+    /** « ✓ » devant l'étape déjà faite (clavier activé / choisi comme clavier). */
+    private fun refreshSteps() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val enabled = imm.enabledInputMethodList.any { it.packageName == packageName }
+        val current = Settings.Secure.getString(contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
+        val chosen = current?.startsWith("$packageName/") == true
+        enableButton.text = (if (enabled) "✓  " else "") + getString(R.string.setup_enable)
+        chooseButton.text = (if (chosen) "✓  " else "") + getString(R.string.setup_choose)
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+    private companion object {
+        const val ACCENT = 0xFF1E88E5.toInt()
+    }
 }

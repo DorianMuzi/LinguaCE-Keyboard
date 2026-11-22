@@ -11,6 +11,13 @@ Android garantit ainsi qu'il ne peut rien envoyer. Il ne garde rien de ce que
 vous tapez ; il mémorise seulement la dernière disposition choisie (latin ou
 cyrillique). Le code est ouvert pour que chacun puisse le vérifier.
 
+**Presse-papiers** — le bouton 📋 colle ce qui est copié, et rien d'autre : le
+clavier ne lit le presse-papiers que quand vous appuyez dessus, ne le surveille
+pas, n'en garde aucun historique, et n'a de toute façon aucun accès à Internet.
+**Annuler** (↶) s'appuie sur un historique en mémoire vive seulement : jamais
+écrit sur le disque, vidé à chaque changement de champ, vide dans les champs de
+mot de passe.
+
 Vérifier vous-même un APK :
 
 ```
@@ -53,6 +60,10 @@ sur le téléphone, comme les mots appris (rien n'est mémorisé dans les champs
 mot de passe, d'adresse ou en navigation privée).
 
 ## Réglages
+
+La **barre d'outils** (⚙ réglages, 😊 emoji, ↶ annuler, 📋 coller) occupe la bande
+du haut quand aucun mot n'est proposé ; dès qu'un mot est reconnu, les
+suggestions prennent sa place. Elle se désactive dans les réglages.
 
 Dans l'app LinguaCE Keyboard : disposition latine (QWERTY / AZERTY), **thème**
 (comme le téléphone / clair / sombre), **hauteur des touches** (petite /

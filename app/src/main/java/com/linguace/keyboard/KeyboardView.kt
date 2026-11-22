@@ -25,6 +25,9 @@ import android.widget.Button
 
 enum class ShiftState { OFF, ONCE, LOCKED }
 
+/** Boutons de la barre d'outils, de gauche à droite. */
+private val TOOLS = listOf("settings", "emoji", "undo", "paste")
+
 /** Thème du clavier (réglage « Thème »). */
 enum class Theme {
     SYSTEM, LIGHT, DARK;
@@ -63,6 +66,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         fun onEmojiPanel()
         fun onEmojiPage(page: String)
         fun onEmojiPick(emoji: String)
+        fun onSettings()
+        fun onUndo()
+        fun onPaste()
     }
 
     /** Appelé quand la bande apparaît ou disparaît (zone visible modifiée). */
@@ -79,6 +85,21 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             // la hauteur ne change pas, seule la zone visible et touchable
             // change — on demande au système de la recalculer.
             if (shown) onContentTopChanged?.invoke()
+            invalidate()
+            announceChange()
+        }
+
+    /**
+     * Barre d'outils (⚙ 😊 ↶ 📋) dans la bande du haut quand il n'y a pas de
+     * suggestion, comme Gboard. Réglage « Barre d'outils ». Désactivée, la
+     * bande reste invisible et laisse passer les touchers jusqu'aux mots.
+     */
+    var showToolbar: Boolean = false
+        set(value) {
+            if (field == value) return
+            field = value
+            place()
+            onContentTopChanged?.invoke()
             invalidate()
             announceChange()
         }
@@ -173,7 +194,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     /** Haut de la partie visible et touchable du clavier, dans la vue. */
     val contentTop: Int
-        get() = if (suggestions.isEmpty()) stripSpace.toInt() else 0
+        get() = if (suggestions.isEmpty() && !(showStrip && showToolbar)) stripSpace.toInt() else 0
 
     /**
      * Réglage « Thème » : [Theme.SYSTEM] suit le téléphone (clair le jour,
@@ -284,6 +305,15 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
                     RectF(i * w + gap, gap, (i + 1) * w - gap, stripHeight),
                 )
             }
+        } else if (showStrip && showToolbar) {
+            // Pas de mot à proposer : la barre d'outils, quatre cases égales.
+            val w = width.toFloat() / TOOLS.size
+            TOOLS.forEachIndexed { i, tool ->
+                out += Placed(
+                    Key(tool, KeyType.TOOL, target = tool),
+                    RectF(i * w + gap, gap, (i + 1) * w - gap, stripHeight),
+                )
+            }
         }
         scrollY = scrollY.coerceIn(0f, maxScroll)
         val h = rowHeightOf(0)
@@ -325,6 +355,15 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
 
     private fun isSpecial(k: Key) =
         k.type != KeyType.CHAR && k.type != KeyType.SPACE && k.type != KeyType.PICTO
+
+    /** Touches de la bande du haut (mots ou outils) : jamais choisies « à côté ». */
+    private fun isStripKey(k: Key) = k.type == KeyType.SUGGESTION || k.type == KeyType.TOOL
+
+    /** Touches en forme de pilule, comme sur Gboard : Entrée, 123, abc. */
+    private fun isPill(k: Key) =
+        k.type == KeyType.ENTER || k.type == KeyType.SYMBOLS || k.type == KeyType.LETTERS
+
+    private val enterPressedColor = 0xFF1565C0.toInt()
 
     private fun drawSuggestion(canvas: Canvas, p: Placed) {
         if (p == pressed) {
@@ -431,24 +470,79 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             lineTo(cx - s, cy + 0.3f * s)
             lineTo(cx - s + head, cy + 0.3f * s + head)
         }
-        icon.color = textColor
+        icon.color = 0xFFFFFFFF.toInt() // sur le fond d'accent
         icon.style = Paint.Style.STROKE
         canvas.drawPath(path, icon)
+    }
+
+    /**
+     * Icônes de la barre d'outils, dessinées au même trait que ⇧ ⌫ ↵ :
+     * ⚙ réglages, 😊 emoji, ↶ annuler, 📋 coller.
+     */
+    private fun drawTool(canvas: Canvas, p: Placed) {
+        if (p == pressed) {
+            fill.color = pressedColor
+            canvas.drawRoundRect(p.rect, radius, radius, fill)
+        }
+        val c = p.rect.centerX()
+        val cy = p.rect.centerY()
+        val d = density
+        icon.color = textColor
+        icon.style = Paint.Style.STROKE
+        when (p.key.target) {
+            "settings" -> {
+                canvas.drawCircle(c, cy, 6f * d, icon)
+                canvas.drawCircle(c, cy, 2.2f * d, icon)
+                for (i in 0 until 8) {
+                    val a = i * Math.PI / 4
+                    val x = kotlin.math.cos(a).toFloat()
+                    val y = kotlin.math.sin(a).toFloat()
+                    canvas.drawLine(c + x * 7.5f * d, cy + y * 7.5f * d, c + x * 10f * d, cy + y * 10f * d, icon)
+                }
+            }
+            "emoji" -> {
+                canvas.drawCircle(c, cy, 10f * d, icon)
+                icon.style = Paint.Style.FILL
+                canvas.drawCircle(c - 3.6f * d, cy - 2.6f * d, 1.3f * d, icon)
+                canvas.drawCircle(c + 3.6f * d, cy - 2.6f * d, 1.3f * d, icon)
+                icon.style = Paint.Style.STROKE
+                canvas.drawArc(RectF(c - 5.5f * d, cy - 5.5f * d, c + 5.5f * d, cy + 5.5f * d), 30f, 120f, false, icon)
+            }
+            "undo" -> {
+                // Arc qui revient en arrière, pointe de flèche à gauche.
+                canvas.drawArc(RectF(c - 7f * d, cy - 7f * d, c + 9f * d, cy + 9f * d), 190f, 230f, false, icon)
+                val tx = c - 6.9f * d
+                val ty = cy - 0.8f * d
+                canvas.drawLine(tx, ty, tx - 0.5f * d, ty - 6f * d, icon)
+                canvas.drawLine(tx, ty, tx + 6f * d, ty - 1.2f * d, icon)
+            }
+            else -> {
+                canvas.drawRoundRect(RectF(c - 7f * d, cy - 8f * d, c + 7f * d, cy + 9f * d), 2f * d, 2f * d, icon)
+                canvas.drawRoundRect(RectF(c - 3.5f * d, cy - 10.5f * d, c + 3.5f * d, cy - 5.5f * d), 1.5f * d, 1.5f * d, icon)
+                canvas.drawLine(c - 3.5f * d, cy, c + 3.5f * d, cy, icon)
+                canvas.drawLine(c - 3.5f * d, cy + 4f * d, c + 3.5f * d, cy + 4f * d, icon)
+            }
+        }
     }
 
     private fun drawKey(canvas: Canvas, p: Placed) {
         val k = p.key
         if (k.type == KeyType.SUGGESTION) return drawSuggestion(canvas, p)
+        if (k.type == KeyType.TOOL) return drawTool(canvas, p)
         if (k.type == KeyType.PICTO) return drawPicto(canvas, p)
         val activeTab = k.type == KeyType.PAGE && Emoji.pageOf(layout.id) == k.target
         fill.color = when {
+            // Entrée : couleur d'accent, comme sur Gboard.
+            k.type == KeyType.ENTER ->
+                if (p == pressed && popupKey == null) enterPressedColor else accent
             p == pressed && popupKey == null -> pressedColor
             k.type == KeyType.SHIFT && shift != ShiftState.OFF -> accent
             activeTab -> accent
             isSpecial(k) -> specialColor
             else -> keyColor
         }
-        canvas.drawRoundRect(p.rect, radius, radius, fill)
+        val corner = if (isPill(k)) p.rect.height() / 2 else radius
+        canvas.drawRoundRect(p.rect, corner, corner, fill)
 
         // ⇧ et ⌫ : icônes dessinées, épaisses comme sur Gboard (les caractères
         // de la police étaient trop fins — retour de l'auteur).
@@ -537,7 +631,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         val inArea = { p: Placed -> !p.scrolls || (y >= scrollTop && y < scrollBottom) }
         placed.firstOrNull { it.rect.contains(x, y) && inArea(it) }?.let { return it }
         if (y < gap + stripSpace) return null
-        return placed.filter { it.key.type != KeyType.SUGGESTION && inArea(it) }
+        return placed.filter { !isStripKey(it.key) && inArea(it) }
             .minByOrNull { (it.rect.centerX() - x).let { d -> d * d } + (it.rect.centerY() - y).let { d -> d * d } }
     }
 
@@ -682,8 +776,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
                     // Le doigt glisse sur une autre touche avant d'être levé :
                     // c'est elle qui sera tapée (comme Gboard).
                     val p = keyAt(x, y)
-                    if (p != null && p != pressed && p.key.type != KeyType.SUGGESTION &&
-                        pressed?.key?.type != KeyType.SUGGESTION
+                    if (p != null && p != pressed && !isStripKey(p.key) &&
+                        pressed?.key?.let { isStripKey(it) } != true
                     ) {
                         handler.removeCallbacks(longPress)
                         handler.removeCallbacks(repeat)
@@ -731,6 +825,12 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         KeyType.EMOJI -> listener.onEmojiPanel()
         KeyType.PAGE -> listener.onEmojiPage(k.target)
         KeyType.PICTO -> if (k.label.isNotEmpty()) listener.onEmojiPick(k.label) else Unit
+        KeyType.TOOL -> when (k.target) {
+            "settings" -> listener.onSettings()
+            "emoji" -> listener.onEmojiPanel()
+            "undo" -> listener.onUndo()
+            else -> listener.onPaste()
+        }
     }
 
     override fun onDetachedFromWindow() {
@@ -787,6 +887,14 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
                 },
             )
             KeyType.PICTO -> k.label
+            KeyType.TOOL -> context.getString(
+                when (k.target) {
+                    "settings" -> R.string.tool_settings
+                    "emoji" -> R.string.key_emoji
+                    "undo" -> R.string.tool_undo
+                    else -> R.string.tool_paste
+                },
+            )
         }
     }
 

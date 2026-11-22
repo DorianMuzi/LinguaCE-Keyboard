@@ -44,6 +44,15 @@
     <string name="set_height_large">Large</string>
     <string name="set_autocaps">Capital letter at the start of a sentence</string>
     <string name="set_double_space">Double space types a full stop</string>
+    <string name="section_layout">LAYOUT</string>
+    <string name="section_appearance">APPEARANCE</string>
+    <string name="section_typing">TYPING</string>
+    <string name="section_privacy">PRIVACY</string>
+    <string name="setup_tips">Tips</string>
+    <string name="set_toolbar">Toolbar (settings, emoji, undo, paste)</string>
+    <string name="tool_settings">Keyboard settings</string>
+    <string name="tool_undo">Undo</string>
+    <string name="tool_paste">Paste</string>
     <string name="key_emoji">Emoji</string>
     <string name="emoji_recent">Recent emoji</string>
     <string name="emoji_smileys">Smileys and people</string>

@@ -10,6 +10,9 @@ import com.linguace.keyboard.Alphabet.DOT
 enum class KeyType {
     CHAR, SHIFT, DELETE, ENTER, SPACE, GLOBE, SYMBOLS, LETTERS, SUGGESTION,
     EMOJI, PAGE, PICTO,
+
+    /** Bouton de la barre d'outils (réglages, emoji, annuler, coller) : son [Key.target]. */
+    TOOL,
 }
 
 /**

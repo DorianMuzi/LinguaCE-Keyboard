@@ -41,6 +41,15 @@
     <string name="set_height_large">Grande</string>
     <string name="set_autocaps">Majuscule en début de phrase</string>
     <string name="set_double_space">Double espace pour un point</string>
+    <string name="section_layout">DISPOSITION</string>
+    <string name="section_appearance">APPARENCE</string>
+    <string name="section_typing">SAISIE</string>
+    <string name="section_privacy">CONFIDENTIALITÉ</string>
+    <string name="setup_tips">Astuces</string>
+    <string name="set_toolbar">Barre d\'outils (réglages, emoji, annuler, coller)</string>
+    <string name="tool_settings">Réglages du clavier</string>
+    <string name="tool_undo">Annuler</string>
+    <string name="tool_paste">Coller</string>
     <string name="key_emoji">Emoji</string>
     <string name="emoji_recent">Emoji récents</string>
     <string name="emoji_smileys">Smileys et personnes</string>

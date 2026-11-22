@@ -1,6 +1,7 @@
 package com.linguace.keyboard
 
 import android.content.Context
+import android.content.Intent
 import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.os.Looper
@@ -91,6 +92,8 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         view?.vibrateOn = prefs.getBoolean(VIBRATE_KEY, true)
         view?.theme = Theme.of(prefs.getString(THEME_KEY, null))
         view?.heightScale = KeyHeight.of(prefs.getString(HEIGHT_KEY, null)).scale
+        view?.showToolbar = prefs.getBoolean(TOOLBAR_KEY, true)
+        undo.clear()
         autoCaps = prefs.getBoolean(AUTOCAPS_KEY, true)
         doubleSpace = prefs.getBoolean(DOUBLE_SPACE_KEY, true)
         scheduleRefresh()
@@ -98,6 +101,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
+        undo.clear()
         saveLearned()
     }
 
@@ -157,8 +161,12 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
             ic.deleteSurroundingText(1, 0)
             ic.commitText(". ", 1)
             ic.endBatchEdit()
+            remember(" ", ". ")
         } else {
+            // Un texte sélectionné est remplacé : ↶ le remettra.
+            val replaced = ic.getSelectedText(0)?.toString().orEmpty()
             ic.commitText(text, 1)
+            remember(replaced, text)
         }
         if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
         scheduleRefresh()
@@ -171,6 +179,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         if (typed.isNotEmpty()) ic.deleteSurroundingText(typed.length, 0)
         ic.commitText("$word ", 1)
         ic.endBatchEdit()
+        remember(typed, "$word ")
         if (learn) words.learn(word)
         if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
         scheduleRefresh()
@@ -181,11 +190,13 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         val selected = ic.getSelectedText(0)
         if (!selected.isNullOrEmpty()) {
             ic.commitText("", 1)
+            remember(selected.toString(), "")
         } else {
             val before = ic.getTextBeforeCursor(16, 0) ?: ""
             val n = Graphemes.lastLength(before)
             if (n > 0) {
                 ic.deleteSurroundingText(n, 0)
+                remember(before.takeLast(n).toString(), "")
             } else {
                 // Champ vide ou texte inaccessible : on laisse l'app décider.
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
@@ -206,6 +217,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
             ic.performEditorAction(action)
         } else {
             ic.commitText("\n", 1)
+            remember("", "\n")
         }
         scheduleRefresh()
     }
@@ -239,6 +251,62 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
 
     override fun onLetters() {
         view?.layout = letters
+    }
+
+    // ─── Barre d'outils : réglages, annuler, coller ─────────────
+    /**
+     * Historique de ↶, en mémoire seulement (voir [UndoStack]). Rien n'y
+     * entre dans un champ de mot de passe ni dans un champ sans texte.
+     */
+    private val undo = UndoStack()
+
+    private fun remember(removed: String, inserted: String) {
+        if (suggest) undo.record(removed, inserted)
+    }
+
+    override fun onSettings() {
+        startActivity(
+            Intent(this, SetupActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+    }
+
+    /** ↶ : défait la dernière saisie (le mot, l'emoji, la suggestion, l'effacement…). */
+    override fun onUndo() {
+        val ic = currentInputConnection ?: return
+        val edit = undo.peek() ?: return
+        if (edit.inserted.isNotEmpty()) {
+            val before = ic.getTextBeforeCursor(edit.inserted.length, 0)?.toString()
+            // Le texte a changé ailleurs (curseur déplacé, autre app) : on ne touche à rien.
+            if (before != edit.inserted) {
+                undo.clear()
+                return
+            }
+        }
+        undo.pop()
+        ic.beginBatchEdit()
+        if (edit.inserted.isNotEmpty()) ic.deleteSurroundingText(edit.inserted.length, 0)
+        if (edit.removed.isNotEmpty()) ic.commitText(edit.removed, 1)
+        ic.endBatchEdit()
+        scheduleRefresh()
+    }
+
+    /**
+     * 📋 : colle le presse-papiers. Il n'est lu QUE quand on appuie sur ce
+     * bouton : le clavier ne le surveille pas, n'en garde aucun historique et
+     * n'a de toute façon aucun accès à Internet.
+     */
+    override fun onPaste() {
+        val ic = currentInputConnection ?: return
+        val clip = (getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager)
+            .primaryClip
+        val text = clip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString()
+        if (text.isNullOrEmpty()) return
+        learnCurrentWord()
+        val replaced = ic.getSelectedText(0)?.toString().orEmpty()
+        ic.commitText(text, 1)
+        remember(replaced, text)
+        if (view?.shift == ShiftState.ONCE) view?.shift = ShiftState.OFF
+        scheduleRefresh()
     }
 
     // ─── Emoji ──────────────────────────────────────────────────
@@ -281,6 +349,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         // Un emoji ferme le mot en cours, comme un séparateur.
         learnCurrentWord()
         ic.commitText(emoji, 1)
+        remember("", emoji)
         if (learn) {
             recentEmoji = Emoji.pushRecent(recentEmoji, emoji)
             prefs.edit().putString(RECENT_EMOJI_KEY, Emoji.serialize(recentEmoji)).apply()
@@ -372,6 +441,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         }
         const val VIBRATE_KEY = "vibrate"
         const val RECENT_EMOJI_KEY = "recent_emoji"
+        const val TOOLBAR_KEY = "toolbar"
         const val THEME_KEY = "theme"
         const val HEIGHT_KEY = "key_height"
         const val AUTOCAPS_KEY = "autocaps"

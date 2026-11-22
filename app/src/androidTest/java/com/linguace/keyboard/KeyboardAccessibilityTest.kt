@@ -36,6 +36,9 @@ class KeyboardAccessibilityTest {
         override fun onEmojiPanel() { typed += "😊" }
         override fun onEmojiPage(page: String) { typed += "page:$page" }
         override fun onEmojiPick(emoji: String) { typed += emoji }
+        override fun onSettings() { typed += "⚙" }
+        override fun onUndo() { typed += "↶" }
+        override fun onPaste() { typed += "📋" }
     }
 
     private fun onMain(block: () -> Unit) =
@@ -97,6 +100,27 @@ class KeyboardAccessibilityTest {
         val food = n[desc(R.string.emoji_food)]!!.first
         onMain { provider.performAction(food, AccessibilityNodeInfo.ACTION_CLICK, null) }
         assertEquals("page:food", typed.last())
+    }
+
+    @Test
+    fun toolbar_showsFourNamedButtons_inTheStrip() {
+        onMain { view.showStrip = true; view.showToolbar = true }
+        val n = nodes()
+        assertEquals(Layouts.LATIN.rows.sumOf { it.size } + 4, n.size)
+        for ((name, expected) in listOf(
+            desc(R.string.tool_settings) to "⚙",
+            desc(R.string.key_emoji) to "😊",
+            desc(R.string.tool_undo) to "↶",
+            desc(R.string.tool_paste) to "📋",
+        )) {
+            val (id, _) = n[name]!!
+            onMain { provider.performAction(id, AccessibilityNodeInfo.ACTION_CLICK, null) }
+            assertEquals(expected, typed.last())
+        }
+        // Un mot proposé prend la place de la barre d'outils.
+        onMain { view.suggestions = listOf("salam") }
+        assertEquals(null, nodes()[desc(R.string.tool_undo)])
+        assertTrue(nodes().keys.any { it.contains("salam") })
     }
 
     @Test
