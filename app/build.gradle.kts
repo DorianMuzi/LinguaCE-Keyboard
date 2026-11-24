@@ -9,9 +9,14 @@ plugins {
 // jamais versionné : voir .gitignore). Sans ce fichier, la version « release »
 // est signée avec la clé de débogage : bonne pour la tester sur l'émulateur,
 // refusée par Google Play.
+// Recherché d'abord à la racine du projet, puis dans ~/.linguace/ (hors du
+// dossier du projet, donc hors d'un éventuel dossier synchronisé dans le cloud).
+val keystoreFile: File? = listOf(
+    rootProject.file("keystore.properties"),
+    File(System.getProperty("user.home"), ".linguace/keystore.properties"),
+).firstOrNull { it.exists() }
 val keystoreProps = Properties().apply {
-    val f = rootProject.file("keystore.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
+    keystoreFile?.inputStream()?.use { load(it) }
 }
 
 android {
@@ -30,7 +35,8 @@ android {
     signingConfigs {
         if (keystoreProps.containsKey("storeFile")) {
             create("release") {
-                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                // Chemin relatif au dossier du fichier de réglages, ou absolu.
+                storeFile = keystoreFile!!.parentFile.resolve(keystoreProps.getProperty("storeFile"))
                 storePassword = keystoreProps.getProperty("storePassword")
                 keyAlias = keystoreProps.getProperty("keyAlias")
                 keyPassword = keystoreProps.getProperty("keyPassword")

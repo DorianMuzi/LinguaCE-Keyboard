@@ -114,7 +114,9 @@ sur le poste de la personne qui publie et n'entre **jamais** dans Git
    ```
    keytool -genkeypair -v -keystore linguace-release.jks -alias linguace -keyalg RSA -keysize 4096 -validity 10000
    ```
-2. Créer `keystore.properties` à la racine :
+2. Créer `keystore.properties` à la racine du projet, ou de préférence dans
+   `~/.linguace/` (hors du dossier du projet, donc hors d'un dossier synchronisé
+   dans le cloud ; `storeFile` y est alors relatif à ce dossier) :
    ```
    storeFile=linguace-release.jks
    storePassword=…
