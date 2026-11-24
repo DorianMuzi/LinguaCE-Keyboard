@@ -51,6 +51,24 @@
     <string name="tool_undo">Annuler</string>
     <string name="tool_paste">Coller</string>
     <string name="key_emoji">Emoji</string>
+
+    <!-- Accueil guidé. -->
+    <string name="ob_welcome_title">Bienvenue dans LinguaCE Keyboard</string>
+    <string name="ob_welcome_text">Écrivez le tchétchène en alphabet latin ou en cyrillique, sur un clavier conçu pour cette langue.</string>
+    <string name="ob_welcome_private">🔒 Privé par conception : ce clavier n\'a aucune permission et aucun accès à Internet. Ce que vous tapez ne quitte jamais votre téléphone.</string>
+    <string name="ob_install_title">Installer le clavier</string>
+    <string name="ob_install_text">Deux étapes rapides. Appuyez sur chaque bouton, puis revenez ici.</string>
+    <string name="ob_install_warning">Android affiche un avertissement standard quand on active un clavier, quel qu\'il soit. LinguaCE Keyboard n\'a aucun accès à Internet : il ne peut rien envoyer, ce que vous pouvez vérifier dans les autorisations de l\'application.</string>
+    <string name="ob_try_title">Essayez-le</string>
+    <string name="ob_try_hint">Si un autre clavier apparaît, revenez en arrière et choisissez LinguaCE Keyboard (étape 2).</string>
+    <string name="ob_try_tip1">Maintenez une lettre pour ses variantes : x → ẋ, s → ş, ç → ç̇.</string>
+    <string name="ob_try_tip2">🌐 passe du latin au cyrillique.</string>
+    <string name="ob_try_tip3">Maintenez la virgule pour les emoji.</string>
+    <string name="ob_back">Retour</string>
+    <string name="ob_next">Suivant</string>
+    <string name="ob_skip">Passer</string>
+    <string name="ob_done">Terminé</string>
+    <string name="ob_replay">Revoir l\'introduction</string>
     <string name="emoji_recent">Emoji récents</string>
     <string name="emoji_smileys">Smileys et personnes</string>
     <string name="emoji_nature">Animaux et nature</string>

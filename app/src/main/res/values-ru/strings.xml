@@ -50,6 +50,24 @@
     <string name="tool_undo">Отменить</string>
     <string name="tool_paste">Вставить</string>
     <string name="key_emoji">Эмодзи</string>
+
+    <!-- Accueil guidé. -->
+    <string name="ob_welcome_title">Добро пожаловать в LinguaCE Keyboard</string>
+    <string name="ob_welcome_text">Пишите по-чеченски латиницей или кириллицей на клавиатуре, созданной для этого языка.</string>
+    <string name="ob_welcome_private">🔒 Конфиденциальность по замыслу: у клавиатуры нет разрешений и нет доступа в интернет. Всё, что вы печатаете, остаётся на телефоне.</string>
+    <string name="ob_install_title">Настройка клавиатуры</string>
+    <string name="ob_install_text">Два быстрых шага. Нажмите каждую кнопку, затем вернитесь сюда.</string>
+    <string name="ob_install_warning">Android показывает стандартное предупреждение при включении любой клавиатуры. У LinguaCE Keyboard нет доступа в интернет, поэтому она ничего не может отправить — это можно проверить в разрешениях приложения.</string>
+    <string name="ob_try_title">Попробуйте</string>
+    <string name="ob_try_hint">Если появилась другая клавиатура, вернитесь и выберите LinguaCE Keyboard (шаг 2).</string>
+    <string name="ob_try_tip1">Удерживайте букву, чтобы увидеть варианты: x → ẋ, s → ş, ç → ç̇.</string>
+    <string name="ob_try_tip2">🌐 переключает латиницу и кириллицу.</string>
+    <string name="ob_try_tip3">Удерживайте запятую — откроются эмодзи.</string>
+    <string name="ob_back">Назад</string>
+    <string name="ob_next">Далее</string>
+    <string name="ob_skip">Пропустить</string>
+    <string name="ob_done">Готово</string>
+    <string name="ob_replay">Показать введение ещё раз</string>
     <string name="emoji_recent">Недавние эмодзи</string>
     <string name="emoji_smileys">Смайлики и люди</string>
     <string name="emoji_nature">Животные и природа</string>

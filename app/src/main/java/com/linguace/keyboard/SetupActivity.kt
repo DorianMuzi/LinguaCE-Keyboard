@@ -118,6 +118,12 @@ class SetupActivity : Activity() {
 
         val prefs = getSharedPreferences("keyboard", Context.MODE_PRIVATE)
 
+        // Première ouverture : l'accueil guidé passe devant. Un lien en bas de
+        // page permet de le revoir.
+        if (savedInstanceState == null && !prefs.getBoolean(OnboardingActivity.ONBOARDED_KEY, false)) {
+            startActivity(Intent(this, OnboardingActivity::class.java))
+        }
+
         /**
          * Un réglage à choix unique : titre puis boutons radio. Deux choix
          * tiennent sur une ligne ; trois se mettent l'un sous l'autre (les
@@ -204,6 +210,16 @@ class SetupActivity : Activity() {
             }
         }
         column.addView(dictionaryButton, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+
+        column.addView(TextView(this).apply {
+            setText(R.string.ob_replay)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            setTextColor(ACCENT)
+            setTypeface(typeface, Typeface.BOLD)
+            gravity = Gravity.CENTER_VERTICAL
+            minHeight = dp(48)
+            setOnClickListener { startActivity(Intent(this@SetupActivity, OnboardingActivity::class.java)) }
+        }, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(12) })
 
         val scroll = ScrollView(this).apply {
             addView(column)

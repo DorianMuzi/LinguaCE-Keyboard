@@ -54,6 +54,24 @@
     <string name="tool_undo">Undo</string>
     <string name="tool_paste">Paste</string>
     <string name="key_emoji">Emoji</string>
+
+    <!-- Accueil guidé. -->
+    <string name="ob_welcome_title">Welcome to LinguaCE Keyboard</string>
+    <string name="ob_welcome_text">Write Chechen in Latin or Cyrillic script, on a keyboard made for the language.</string>
+    <string name="ob_welcome_private">🔒 Private by design: this keyboard has no permission and no Internet access. What you type never leaves your phone.</string>
+    <string name="ob_install_title">Set up the keyboard</string>
+    <string name="ob_install_text">Two quick steps. Tap each button, then come back here.</string>
+    <string name="ob_install_warning">Android shows a standard warning when you turn on any keyboard. LinguaCE Keyboard has no Internet access, so it cannot send anything — you can check this in the app\'s permissions.</string>
+    <string name="ob_try_title">Try it</string>
+    <string name="ob_try_hint">If another keyboard appears, go back and choose LinguaCE Keyboard (step 2).</string>
+    <string name="ob_try_tip1">Hold a letter for its variants: x → ẋ, s → ş, ç → ç̇.</string>
+    <string name="ob_try_tip2">🌐 switches between Latin and Cyrillic.</string>
+    <string name="ob_try_tip3">Hold the comma for emoji.</string>
+    <string name="ob_back">Back</string>
+    <string name="ob_next">Next</string>
+    <string name="ob_skip">Skip</string>
+    <string name="ob_done">Done</string>
+    <string name="ob_replay">Show the introduction again</string>
     <string name="emoji_recent">Recent emoji</string>
     <string name="emoji_smileys">Smileys and people</string>
     <string name="emoji_nature">Animals and nature</string>
