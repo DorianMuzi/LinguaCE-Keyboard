@@ -207,6 +207,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             invalidate()
         }
 
+    /** Le clavier est-il sombre en ce moment (selon le thème choisi et le téléphone) ? */
+    val isDark: Boolean get() = dark
+
     private val dark: Boolean
         get() = when (theme) {
             Theme.LIGHT -> false

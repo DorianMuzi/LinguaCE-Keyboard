@@ -95,10 +95,50 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         view?.theme = Theme.of(prefs.getString(THEME_KEY, null))
         view?.heightScale = KeyHeight.of(prefs.getString(HEIGHT_KEY, null)).scale
         view?.showToolbar = prefs.getBoolean(TOOLBAR_KEY, true)
+        applyNavigationBarIcons()
         undo.clear()
         autoCaps = prefs.getBoolean(AUTOCAPS_KEY, true)
         doubleSpace = prefs.getBoolean(DOUBLE_SPACE_KEY, true)
         scheduleRefresh()
+    }
+
+    override fun onWindowShown() {
+        super.onWindowShown()
+        applyNavigationBarIcons()
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Le téléphone passe de clair à sombre (ou inverse) : le thème « comme le téléphone » suit.
+        view?.invalidate()
+        applyNavigationBarIcons()
+    }
+
+    /**
+     * Icônes de la barre de navigation (⌄, changement de clavier, barre de
+     * geste) : sombres sur un clavier clair, claires sur un clavier sombre.
+     * Par défaut elles suivent le thème du TÉLÉPHONE : un clavier clair sur un
+     * téléphone sombre les rendait blanches sur fond clair, presque invisibles
+     * (retour de l'auteur).
+     */
+    private fun applyNavigationBarIcons() {
+        val w = window?.window ?: return
+        val light = view?.isDark == false
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            w.insetsController?.setSystemBarsAppearance(
+                if (light) android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS else 0,
+                android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            val flags = w.decorView.systemUiVisibility
+            @Suppress("DEPRECATION")
+            w.decorView.systemUiVisibility = if (light) {
+                flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            } else {
+                flags and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
+            }
+        }
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
