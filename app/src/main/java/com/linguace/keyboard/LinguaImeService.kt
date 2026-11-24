@@ -83,6 +83,8 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         // Mots effacés depuis l'écran d'installation : on repart de zéro.
         if (prefs.getInt(EPOCH_KEY, 0) != wordsEpoch) loadLearned()
         configureField(info)
+        selStart = info?.initialSelStart ?: 0
+        selEnd = info?.initialSelEnd ?: 0
         // QWERTY / AZERTY a pu changer dans les réglages entre-temps.
         if (letters.isLatin) letters = Layouts.latin(isAzerty(this))
         view?.layout = letters
@@ -116,8 +118,20 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         candidatesStart: Int, candidatesEnd: Int,
     ) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
+        selStart = newSelStart
+        selEnd = newSelEnd
         scheduleRefresh()
     }
+
+    /**
+     * Sélection connue, tenue à jour par le système. Frappe rapide : on ne
+     * demande JAMAIS à l'app « y a-t-il du texte sélectionné ? » à chaque
+     * touche (un aller-retour bloquant avec l'app ralentit nettement la
+     * frappe, constaté en mesurant contre Gboard).
+     */
+    private var selStart = 0
+    private var selEnd = 0
+    private val hasSelection: Boolean get() = selStart != selEnd
 
     /**
      * Jamais de suggestions dans un mot de passe ni si l'app les refuse ;
@@ -164,7 +178,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
             remember(" ", ". ")
         } else {
             // Un texte sélectionné est remplacé : ↶ le remettra.
-            val replaced = ic.getSelectedText(0)?.toString().orEmpty()
+            val replaced = if (hasSelection) ic.getSelectedText(0)?.toString().orEmpty() else ""
             ic.commitText(text, 1)
             remember(replaced, text)
         }
@@ -187,7 +201,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
 
     override fun onDelete() {
         val ic = currentInputConnection ?: return
-        val selected = ic.getSelectedText(0)
+        val selected = if (hasSelection) ic.getSelectedText(0) else null
         if (!selected.isNullOrEmpty()) {
             ic.commitText("", 1)
             remember(selected.toString(), "")
