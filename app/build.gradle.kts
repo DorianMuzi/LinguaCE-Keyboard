@@ -21,14 +21,15 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "com.linguace.keyboard"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.linguace.keyboard"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "0.3.0"
+        targetSdk = 36
+        // Google Play refuse deux fois le même code : à augmenter à chaque envoi.
+        versionCode = 2
+        versionName = "0.3.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

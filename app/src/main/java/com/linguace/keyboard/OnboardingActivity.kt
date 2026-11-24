@@ -77,6 +77,11 @@ class OnboardingActivity : Activity() {
         )
         frame.padForSystemBars()
         setContentView(frame)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+            ) { handleBack() }
+        }
         show()
     }
 
@@ -90,10 +95,19 @@ class OnboardingActivity : Activity() {
         refreshSteps()
     }
 
-    /** Retour : page précédente, puis sortie vers les réglages. */
+    /**
+     * Retour : page précédente, puis sortie vers les réglages. Android 13+ (et
+     * obligatoire avec le niveau d'API cible 36) : le geste « retour » passe
+     * par un rappel enregistré, l'ancienne méthode n'est plus appelée.
+     */
+    private fun handleBack() {
+        if (page > 0) go(page - 1) else finishOnboarding()
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (page > 0) go(page - 1) else finishOnboarding()
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) handleBack()
+        else super.onBackPressed()
     }
 
     private fun finishOnboarding() {
