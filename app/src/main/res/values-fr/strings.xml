@@ -3,7 +3,7 @@
     <string name="ime_name">LinguaCE — tchétchène</string>
     <string name="setup_title">Clavier tchétchène</string>
     <!--   : espace insécable, pour ne pas couper « x → ẋ » en fin de ligne. -->
-    <string name="setup_intro">Écris le tchétchène en latin et en cyrillique — un projet LinguaCE.\n\n• 🌐 : passer du latin au cyrillique.\n• Appui long sur une lettre : ses variantes (x → ẋ, s → ş, ç → ç̇…).\n• En cyrillique, la touche Ӏ (palotchka).\n• Tape sans accents : « noxciyn » te propose « noxçiyŋ ».</string>
+    <string name="setup_intro">Écris le tchétchène en latin et en cyrillique — un projet LinguaCE.\n\n• КИР / LAT : passer du latin au cyrillique.\n• Appui long sur une lettre : ses variantes (x → ẋ, s → ş, ç → ç̇…).\n• En cyrillique, la touche Ӏ (palotchka).\n• Tape sans accents : « noxciyn » te propose « noxçiyŋ ».</string>
     <string name="setup_enable">1. Activer LinguaCE Keyboard</string>
     <string name="setup_choose">2. Choisir LinguaCE Keyboard</string>
     <string name="setup_try">Essaie ici…</string>
@@ -62,7 +62,7 @@
     <string name="ob_try_title">Essayez-le</string>
     <string name="ob_try_hint">Si un autre clavier apparaît, revenez en arrière et choisissez LinguaCE Keyboard (étape 2).</string>
     <string name="ob_try_tip1">Maintenez une lettre pour ses variantes : x → ẋ, s → ş, ç → ç̇.</string>
-    <string name="ob_try_tip2">🌐 passe du latin au cyrillique.</string>
+    <string name="ob_try_tip2">La touche КИР / LAT passe du latin au cyrillique.</string>
     <string name="ob_try_tip3">Maintenez la virgule pour les emoji.</string>
     <string name="ob_back">Retour</string>
     <string name="ob_next">Suivant</string>

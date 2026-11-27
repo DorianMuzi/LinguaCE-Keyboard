@@ -35,7 +35,7 @@ l'appui long de leur lettre de base :
  q  w  e  r  t  y  u  i  o  p
  a  s  d  f  g  h  j  k  l  ə
  ⇧  z  x  c  v  b  n  m  ç  ⌫
- 🌐 123  ,     espace     .  ↵
+ КИР 123  ,     espace     .  ↵
 ```
 
 Appui long : a → ä, c → ċ, ç → ç̇, g → ġ, k → k̇, n → ŋ, o → ö, p → ṗ,
@@ -47,7 +47,7 @@ d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
 **Cyrillique** — ЙЦУКЕН, touche **Ӏ** (U+04C0) dans la rangée du bas ;
 ъ par appui long sur ь, ё sur е.
 
-**🌐** passe du latin au cyrillique ; un appui long sur 🌐 ouvre le choix du
+**КИР / LAT** (l'alphabet visé) passe du latin au cyrillique ; un appui long sur cette touche ouvre le choix du
 clavier système. **⇧** : une majuscule ; deux appuis : verrouillage.
 
 ## Emoji

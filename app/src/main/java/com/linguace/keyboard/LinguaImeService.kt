@@ -294,7 +294,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
         view?.layout = letters
     }
 
-    /** Appui long sur 🌐 : changer de clavier (celui du système, par exemple). */
+    /** Appui long sur КИР / LAT : changer de clavier (celui du système, par exemple). */
     override fun onGlobeLongPress() {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
     }

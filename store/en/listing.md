@@ -14,7 +14,7 @@ LinguaCE Keyboard is a project of the LinguaCE ecosystem, which supports learnin
 WRITE CHECHEN PROPERLY
 • Latin Chechen alphabet: hold a letter for its variants (x → ẋ, s → ş, c → ċ, ç → ç̇, n → ŋ…).
 • Cyrillic keyboard with the Ӏ (palochka) key.
-• 🌐 switches between Latin and Cyrillic; long-press 🌐 to change keyboard.
+• The КИР / LAT key switches between Latin and Cyrillic; long-press it to change keyboard.
 • QWERTY or AZERTY for the Latin layout.
 • Digits by long-press on the top row, like Gboard.
 • The w stays available for foreign words.

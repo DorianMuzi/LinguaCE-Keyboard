@@ -14,7 +14,7 @@ LinguaCE Keyboard est un projet de l'écosystème LinguaCE, qui soutient l'appre
 ÉCRIRE LE TCHÉTCHÈNE CORRECTEMENT
 • Alphabet latin tchétchène : appui long sur une lettre pour ses variantes (x → ẋ, s → ş, c → ċ, ç → ç̇, n → ŋ…).
 • Clavier cyrillique avec la touche Ӏ (paloçka).
-• 🌐 passe du latin au cyrillique ; appui long sur 🌐 pour changer de clavier.
+• La touche КИР / LAT passe du latin au cyrillique ; appui long pour changer de clavier.
 • QWERTY ou AZERTY pour le clavier latin.
 • Chiffres par appui long sur la rangée du haut, comme Gboard.
 • Le w reste disponible pour les mots d'origine étrangère.

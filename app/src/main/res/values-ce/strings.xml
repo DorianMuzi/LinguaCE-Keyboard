@@ -11,7 +11,7 @@
     <string name="ime_name">LinguaCE — noxçiyŋ</string>
     <string name="setup_title">Noxçiyŋ klaviatura</string>
     <!--   : espace insécable, pour ne pas couper « x → ẋ » en fin de ligne. -->
-    <string name="setup_intro">LinguaCE proektaŋ noxçiyŋ klaviatura, latinaŋ a, kirillican a elpaşca.\n\n• 🌐: latinica a, kirillica a xiycado.\n• Elp dexxa ṫetajiyça: cünaŋ kepaş (x → ẋ, s → ş, ç → ç̇…).\n• Kirilliceẋ Ӏ klavişa (paloçka).\n• Bilgalonaş docuş yazde: «noxciyn» → «noxçiyŋ».</string>
+    <string name="setup_intro">LinguaCE proektaŋ noxçiyŋ klaviatura, latinaŋ a, kirillican a elpaşca.\n\n• КИР / LAT: latinica a, kirillica a xiycado.\n• Elp dexxa ṫetajiyça: cünaŋ kepaş (x → ẋ, s → ş, ç → ç̇…).\n• Kirilliceẋ Ӏ klavişa (paloçka).\n• Bilgalonaş docuş yazde: «noxciyn» → «noxçiyŋ».</string>
     <string name="setup_enable">1. LinguaCE Keyboard lataye</string>
     <string name="setup_choose">2. LinguaCE Keyboard xarƶa</string>
     <string name="setup_try">Quzaẋ yazde…</string>

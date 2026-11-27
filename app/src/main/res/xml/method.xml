@@ -2,7 +2,7 @@
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     android:settingsActivity="com.linguace.keyboard.SetupActivity"
     android:supportsSwitchingToNextInputMethod="true">
-    <!-- ce = tchétchène (ISO 639-1). Latin et cyrillique se basculent avec 🌐. -->
+    <!-- ce = tchétchène (ISO 639-1). Latin et cyrillique se basculent avec la touche КИР / LAT. -->
     <subtype
         android:imeSubtypeLocale="ce"
         android:imeSubtypeMode="keyboard"

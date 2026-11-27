@@ -5,7 +5,7 @@
     <!-- Comme Gboard : la langue écrite dans la langue elle-même, sur tous les téléphones. -->
     <string name="subtype_ce" translatable="false">Noxçiyŋ · Нохчийн</string>
     <string name="setup_title">Chechen keyboard</string>
-    <string name="setup_intro">Write Chechen in Latin and Cyrillic script — a LinguaCE project.\n\n• 🌐: switch between Latin and Cyrillic.\n• Hold a letter for its variants (x → ẋ, s → ş, ç → ç̇…).\n• In Cyrillic, the Ӏ key (palochka).\n• Type without accents: “noxciyn” suggests “noxçiyŋ”.</string>
+    <string name="setup_intro">Write Chechen in Latin and Cyrillic script — a LinguaCE project.\n\n• КИР / LAT: switch between Latin and Cyrillic.\n• Hold a letter for its variants (x → ẋ, s → ş, ç → ç̇…).\n• In Cyrillic, the Ӏ key (palochka).\n• Type without accents: “noxciyn” suggests “noxçiyŋ”.</string>
     <string name="setup_enable">1. Enable LinguaCE Keyboard</string>
     <string name="setup_choose">2. Choose LinguaCE Keyboard</string>
     <string name="setup_try">Try it here…</string>
@@ -65,7 +65,7 @@
     <string name="ob_try_title">Try it</string>
     <string name="ob_try_hint">If another keyboard appears, go back and choose LinguaCE Keyboard (step 2).</string>
     <string name="ob_try_tip1">Hold a letter for its variants: x → ẋ, s → ş, ç → ç̇.</string>
-    <string name="ob_try_tip2">🌐 switches between Latin and Cyrillic.</string>
+    <string name="ob_try_tip2">The КИР / LAT key switches between Latin and Cyrillic.</string>
     <string name="ob_try_tip3">Hold the comma for emoji.</string>
     <string name="ob_back">Back</string>
     <string name="ob_next">Next</string>

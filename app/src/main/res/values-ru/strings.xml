@@ -2,7 +2,7 @@
 <resources>
     <string name="ime_name">LinguaCE — чеченский</string>
     <string name="setup_title">Чеченская клавиатура</string>
-    <string name="setup_intro">Пишите по-чеченски латиницей и кириллицей — проект LinguaCE.\n\n• 🌐 — переключение латиницы и кириллицы.\n• Долгое нажатие на букву — её варианты (x → ẋ, s → ş, ç → ç̇…).\n• В кириллице — клавиша Ӏ (палочка).\n• Печатайте без диакритики: «noxciyn» подскажет «noxçiyŋ».</string>
+    <string name="setup_intro">Пишите по-чеченски латиницей и кириллицей — проект LinguaCE.\n\n• КИР / LAT — переключение латиницы и кириллицы.\n• Долгое нажатие на букву — её варианты (x → ẋ, s → ş, ç → ç̇…).\n• В кириллице — клавиша Ӏ (палочка).\n• Печатайте без диакритики: «noxciyn» подскажет «noxçiyŋ».</string>
     <string name="setup_enable">1. Включить LinguaCE Keyboard</string>
     <string name="setup_choose">2. Выбрать LinguaCE Keyboard</string>
     <string name="setup_try">Попробуйте здесь…</string>
@@ -61,7 +61,7 @@
     <string name="ob_try_title">Попробуйте</string>
     <string name="ob_try_hint">Если появилась другая клавиатура, вернитесь и выберите LinguaCE Keyboard (шаг 2).</string>
     <string name="ob_try_tip1">Удерживайте букву, чтобы увидеть варианты: x → ẋ, s → ş, ç → ç̇.</string>
-    <string name="ob_try_tip2">🌐 переключает латиницу и кириллицу.</string>
+    <string name="ob_try_tip2">Клавиша КИР / LAT переключает латиницу и кириллицу.</string>
     <string name="ob_try_tip3">Удерживайте запятую — откроются эмодзи.</string>
     <string name="ob_back">Назад</string>
     <string name="ob_next">Далее</string>

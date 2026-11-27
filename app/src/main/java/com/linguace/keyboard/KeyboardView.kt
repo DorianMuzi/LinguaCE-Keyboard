@@ -113,10 +113,20 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             invalidate()
         }
 
+    /**
+     * Alphabet de saisie en cours (latin ou cyrillique), retenu même quand on
+     * passe sur les symboles ou les emoji : la touche de changement d'alphabet
+     * affiche l'alphabet VERS lequel elle bascule (« КИР » depuis le latin,
+     * « LAT » depuis le cyrillique).
+     */
+    private var lettersLatin = true
+
     var layout: Layout = Layouts.LATIN
         set(value) {
             // Une autre page d'emoji repart du haut ; la même page garde sa place.
             if (field.id != value.id) scrollY = 0f
+            if (value.isLatin) lettersLatin = true
+            else if (value.id == Layouts.CYRILLIC.id) lettersLatin = false
             field = value
             requestLayout()
             invalidate()
@@ -559,6 +569,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             KeyType.SHIFT -> if (shift == ShiftState.LOCKED) "⇪" else "⇧"
             KeyType.SPACE -> if (layout.id == Layouts.CYRILLIC.id) "Нохчийн" else "Noxçiyŋ"
             KeyType.LETTERS -> "abc"
+            // Le globe était peu parlant : on écrit l'alphabet visé (КИР / LAT).
+            KeyType.GLOBE -> if (lettersLatin) "КИР" else "LAT"
             else -> k.label
         }
         text.color = if (k.type == KeyType.SHIFT && shift != ShiftState.OFF) 0xFFFFFFFF.toInt() else textColor
@@ -569,6 +581,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             KeyType.SHIFT -> 26 * density
             KeyType.DELETE, KeyType.ENTER -> 24 * density
             KeyType.PAGE, KeyType.EMOJI -> 19 * density
+            KeyType.GLOBE -> 15 * density
             else -> 16 * density
         }
         if (k.type == KeyType.SPACE) text.color = hintColor
@@ -579,9 +592,15 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         // le rendu que l'auteur avait validé.
         val latin = layout.isLatin
         // Toutes les lettres descendent d'autant : elles restent alignées.
-        val drop = if (latin && k.type == KeyType.CHAR) 2.5f * density else 0f
+        // Cyrillique : seulement en majuscules (leurs capitales montent jusqu'aux
+        // chiffres de la rangée du haut, retour de l'auteur) ; en minuscules, le
+        // rendu validé ne bouge pas.
+        val capsCyrillic = shifted && layout.id == Layouts.CYRILLIC.id
+        val drop = if ((latin || capsCyrillic) && k.type == KeyType.CHAR) 2.5f * density else 0f
+        text.isFakeBoldText = k.type == KeyType.GLOBE
         val y = p.rect.centerY() - (text.descent() + text.ascent()) / 2 + drop
         canvas.drawText(label, p.rect.centerX(), y, text)
+        text.isFakeBoldText = false // le pinceau est partagé : ne pas durcir les autres textes
 
         // Indices d'appui long : la lettre dérivée en haut à droite, le chiffre
         // (rangée du haut, comme Gboard) en haut à gauche.
