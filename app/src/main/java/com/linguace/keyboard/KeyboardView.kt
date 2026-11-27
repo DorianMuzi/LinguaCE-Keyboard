@@ -573,7 +573,12 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             KeyType.GLOBE -> if (lettersLatin) "КИР" else "LAT"
             else -> k.label
         }
-        text.color = if (k.type == KeyType.SHIFT && shift != ShiftState.OFF) 0xFFFFFFFF.toInt() else textColor
+        text.color = when {
+            k.type == KeyType.SHIFT && shift != ShiftState.OFF -> 0xFFFFFFFF.toInt()
+            // КИР / LAT : bleu d'accent, plus discret que le texte des lettres.
+            k.type == KeyType.GLOBE -> accent
+            else -> textColor
+        }
         text.textSize = when (k.type) {
             KeyType.CHAR -> 20 * density
             KeyType.SPACE -> 13 * density
@@ -581,7 +586,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             KeyType.SHIFT -> 26 * density
             KeyType.DELETE, KeyType.ENTER -> 24 * density
             KeyType.PAGE, KeyType.EMOJI -> 19 * density
-            KeyType.GLOBE -> 15 * density
+            KeyType.GLOBE -> 12 * density
             else -> 16 * density
         }
         if (k.type == KeyType.SPACE) text.color = hintColor
