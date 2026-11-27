@@ -139,8 +139,10 @@ object Layouts {
 
     /**
      * Cyrillique tchétchène : ЙЦУКЕН, avec la touche Ӏ (palochka, U+04C0,
-     * toujours en forme majuscule comme le veut l'usage tchétchène). ъ par
-     * appui long sur ь, ё sur е.
+     * toujours en forme majuscule comme le veut l'usage tchétchène). ъ est une
+     * touche directe (très fréquent en tchétchène : хӀаъ, шиъ…) ; ь, surtout
+     * utile dans les mots russes, est en appui long sur ъ (choix de l'auteur,
+     * 2026-11-28) ; ё sur е.
      */
     val CYRILLIC = Layout(
         "cyrillic",
@@ -154,7 +156,7 @@ object Layouts {
             row("ф ы в а п р о л д ж э"),
             shiftRow(
                 11f,
-                listOf(k("я"), k("ч"), k("с"), k("м"), k("и"), k("т"), k("ь", "ъ"), k("б"), k("ю")),
+                listOf(k("я"), k("ч"), k("с"), k("м"), k("и"), k("т"), k("ъ", "ь"), k("б"), k("ю")),
             ),
             listOf(
                 Key("🌐", KeyType.GLOBE, 1.25f), Key("123", KeyType.SYMBOLS, 1.25f),
