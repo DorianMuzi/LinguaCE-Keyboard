@@ -28,8 +28,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // Google Play refuse deux fois le même code : à augmenter à chaque envoi.
-        versionCode = 4
-        versionName = "0.3.3"
+        versionCode = 5
+        versionName = "0.3.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

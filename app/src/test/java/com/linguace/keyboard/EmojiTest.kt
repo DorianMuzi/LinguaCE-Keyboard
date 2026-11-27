@@ -44,6 +44,17 @@ class EmojiTest {
     }
 
     @Test
+    fun recentsTab_isNeverEmpty_andKeepsRealRecentsFirst() {
+        val none = Emoji.withDefaults(emptyList())
+        assertEquals(Emoji.MAX_RECENT, none.size)
+        assertEquals(none.toSet().size, none.size)
+        val some = Emoji.withDefaults(listOf("🍏", "😂"))
+        assertEquals(listOf("🍏", "😂"), some.take(2))
+        assertEquals(1, some.count { it == "😂" })   // pas de doublon avec les emoji courants
+        assertEquals(Emoji.MAX_RECENT, some.size)
+    }
+
+    @Test
     fun pageOf_readsTheLayoutId() {
         assertEquals("food", Emoji.pageOf(Emoji.layout("food", listOf("🍔")).id))
         assertNull(Emoji.pageOf(Layouts.LATIN.id))

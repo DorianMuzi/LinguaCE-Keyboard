@@ -389,7 +389,7 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
      * dessiner (sur un téléphone ancien, ils s'afficheraient en carrés).
      */
     private fun emojiLayout(page: String): Layout {
-        if (page == Emoji.RECENT) return Emoji.layout(page, supported(recentEmoji))
+        if (page == Emoji.RECENT) return Emoji.layout(page, supported(Emoji.withDefaults(recentEmoji)))
         return emojiLayouts.getOrPut(page) {
             Emoji.layout(page, supported(Emoji.category(page)?.emojis.orEmpty()))
         }

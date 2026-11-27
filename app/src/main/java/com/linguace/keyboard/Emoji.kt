@@ -83,6 +83,18 @@ object Emoji {
 
     fun category(id: String): Category? = CATEGORIES.firstOrNull { it.id == id }
 
+    /** Emoji courants proposés tant que l'on n'en a pas assez tapé soi-même. */
+    val DEFAULT_RECENT: List<String> = list(
+        "😀 😂 🤣 😊 😍 😘 😉 😎 🤔 😭 😢 😡 👍 👎 🙏 👏 💪 ❤️ 🔥 ✨ 🎉 💯 ✅ 😅 🥰 🤝 😴",
+    )
+
+    /**
+     * Contenu de l'onglet 🕘 : les emoji récents d'abord, puis des emoji
+     * courants pour compléter (la page n'est jamais vide).
+     */
+    fun withDefaults(recent: List<String>): List<String> =
+        (recent + DEFAULT_RECENT.filter { it !in recent }).take(MAX_RECENT)
+
     /** Page affichée à l'ouverture : les récents s'il y en a, sinon les smileys. */
     fun firstPage(recent: List<String>) = if (recent.isEmpty()) CATEGORIES.first().id else RECENT
 
