@@ -75,15 +75,15 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     /** Appelé quand la bande apparaît ou disparaît (zone visible modifiée). */
     var onContentTopChanged: (() -> Unit)? = null
 
-    /** La première case est la combinaison avec Ӏ (кӀ…) et non un mot : voir [PalochkaHint]. */
-    private var chipFirst = false
+    /** Nombre de premières cases qui sont des combinaisons (кӀ, къ…) et non des mots : voir [CombinationHints]. */
+    private var chipCount = 0
 
-    /** Définit les cases de la bande ; [chip] : la première est la combinaison avec Ӏ. */
-    fun setSuggestions(words: List<String>, chip: Boolean) {
-        val changed = chip != chipFirst
-        chipFirst = chip
+    /** Définit les cases de la bande ; les [chips] premières sont des combinaisons de lettres. */
+    fun setSuggestions(words: List<String>, chips: Int) {
+        val changed = chips != chipCount
+        chipCount = chips
         if (changed && words == suggestions) {
-            // Mêmes textes, mais la première case change de rôle : on refait la bande.
+            // Mêmes textes, mais les premières cases changent de rôle : on refait la bande.
             place(); invalidate(); announceChange()
         } else {
             suggestions = words
@@ -358,7 +358,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             val w = width.toFloat() / 3
             suggestions.take(3).forEachIndexed { i, word ->
                 out += Placed(
-                    Key(word, KeyType.SUGGESTION, target = if (i == 0 && chipFirst) "palochka" else ""),
+                    Key(word, KeyType.SUGGESTION, target = if (i < chipCount) "chip" else ""),
                     RectF(i * w + gap, gap, (i + 1) * w - gap, stripHeight),
                 )
             }
@@ -443,8 +443,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             fill.color = pressedColor
             canvas.drawRoundRect(p.rect, radius, radius, fill)
         }
-        // La combinaison avec Ӏ se distingue d'un mot : en bleu d'accent.
-        text.color = if (p.key.target == "palochka") accent else textColor
+        // Une combinaison de lettres (кӀ, къ…) se distingue d'un mot : en bleu d'accent.
+        text.color = if (p.key.target == "chip") accent else textColor
         text.textSize = 17 * density
         var label = p.key.label
         // Mot trop long pour sa case : on le coupe avec « … ».
@@ -946,9 +946,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         KeyType.GLOBE -> listener.onGlobe()
         KeyType.SYMBOLS -> listener.onSymbols()
         KeyType.LETTERS -> listener.onLetters()
-        // кӀ… : on ajoute seulement Ӏ après la lettre déjà tapée (pas d'espace).
+        // кӀ, къ, хь… : on ajoute seulement la 2ᵉ lettre après la lettre déjà tapée (pas d'espace).
         KeyType.SUGGESTION ->
-            if (k.target == "palochka") listener.onText(PalochkaHint.PALOCHKA)
+            if (k.target == "chip") listener.onText(k.label.substring(1))
             else listener.onSuggestion(k.label)
         KeyType.EMOJI -> listener.onEmojiPanel()
         KeyType.PAGE -> listener.onEmojiPage(k.target)
