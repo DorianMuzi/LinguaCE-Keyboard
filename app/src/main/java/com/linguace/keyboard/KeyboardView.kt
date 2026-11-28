@@ -11,6 +11,7 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.os.Bundle
@@ -80,6 +81,9 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             if (field == value) return
             val shown = field.isEmpty() != value.isEmpty()
             field = value
+            // Fondu de la bande seulement quand elle change de nature (mots ↔
+            // outils), pas à chaque lettre tapée.
+            if (shown) stripStart = startMotion()
             place()
             // La bande n'apparaît que s'il y a des mots (demande de l'auteur) :
             // la hauteur ne change pas, seule la zone visible et touchable
@@ -121,10 +125,35 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
      */
     private var lettersLatin = true
 
+    // ─── Mouvements (voir Motion) ───────────────────────────────
+    private var popupStart = 0L
+    private var panelStart = 0L
+    private var stripStart = 0L
+
+    /** Heure de départ d'une animation, ou 0 si Android a coupé les animations. */
+    private fun startMotion(): Long {
+        val scale = try {
+            android.provider.Settings.Global.getFloat(
+                context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f,
+            )
+        } catch (_: Exception) { 1f }
+        return if (Motion.enabled(scale) && isAttachedToWindow) SystemClock.uptimeMillis() else 0L
+    }
+
+    /** 0 = lettres, 1 = symboles, 2 = emoji : on anime seulement un changement de famille. */
+    private fun family(l: Layout) = when {
+        Emoji.pageOf(l.id) != null -> 2
+        l.id == Layouts.SYMBOLS.id -> 1
+        else -> 0
+    }
+
     var layout: Layout = Layouts.LATIN
         set(value) {
             // Une autre page d'emoji repart du haut ; la même page garde sa place.
             if (field.id != value.id) scrollY = 0f
+            // Lettres ↔ symboles ↔ emoji : transition courte. Latin ↔ cyrillique
+            // et changement de page d'emoji restent instantanés.
+            if (family(field) != family(value)) panelStart = startMotion()
             if (value.isLatin) lettersLatin = true
             else if (value.id == Layouts.CYRILLIC.id) lettersLatin = false
             field = value
@@ -355,6 +384,16 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         // Fond seulement sous la partie visible : la bande vide reste transparente.
         fill.color = bgColor
         canvas.drawRect(0f, contentTop.toFloat(), width.toFloat(), height.toFloat(), fill)
+        // Changement de panneau : fondu + glissement de quelques points.
+        val now = SystemClock.uptimeMillis()
+        val pt = Motion.easeOut(Motion.progress(now, panelStart, Motion.PANEL_MS))
+        val layer = if (pt < 1f) {
+            canvas.saveLayerAlpha(
+                0f, contentTop.toFloat(), width.toFloat(), height.toFloat(),
+                (255 * (0.35f + 0.65f * pt)).toInt(),
+            )
+        } else -1
+        if (pt < 1f) canvas.translate(0f, (1f - pt) * 10 * density)
         // La grille qui défile est rognée à sa zone ; le reste se dessine normalement.
         for (p in placed) if (!p.scrolls) drawKey(canvas, p)
         if (placed.any { it.scrolls }) {
@@ -363,7 +402,13 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             for (p in placed) if (p.scrolls) drawKey(canvas, p)
             canvas.restore()
         }
+        if (layer >= 0) canvas.restoreToCount(layer)
         popupKey?.let { drawPopup(canvas) }
+        // Tant qu'un mouvement est en cours, on redessine ; ensuite, plus rien.
+        if (Motion.running(now, panelStart, Motion.PANEL_MS) ||
+            Motion.running(now, popupStart, Motion.POPUP_MS) ||
+            Motion.running(now, stripStart, Motion.STRIP_MS, 3 * Motion.STRIP_STAGGER_MS)
+        ) postInvalidateOnAnimation()
     }
 
     private fun isSpecial(k: Key) =
@@ -538,10 +583,29 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         }
     }
 
+    /**
+     * Bande du haut : quand elle change de nature (mots ↔ outils), chaque case
+     * apparaît en fondu avec 30 ms de décalage sur la précédente.
+     */
+    private fun drawStripKey(canvas: Canvas, p: Placed) {
+        val i = placed.indexOfFirst { it === p }.coerceAtLeast(0)
+        val t = Motion.easeOut(
+            Motion.progress(
+                SystemClock.uptimeMillis(), stripStart, Motion.STRIP_MS, i * Motion.STRIP_STAGGER_MS,
+            ),
+        )
+        val layer = if (t < 1f) {
+            canvas.saveLayerAlpha(
+                p.rect.left - 4, p.rect.top - 4, p.rect.right + 4, p.rect.bottom + 4, (255 * t).toInt(),
+            )
+        } else -1
+        if (p.key.type == KeyType.SUGGESTION) drawSuggestion(canvas, p) else drawTool(canvas, p)
+        if (layer >= 0) canvas.restoreToCount(layer)
+    }
+
     private fun drawKey(canvas: Canvas, p: Placed) {
         val k = p.key
-        if (k.type == KeyType.SUGGESTION) return drawSuggestion(canvas, p)
-        if (k.type == KeyType.TOOL) return drawTool(canvas, p)
+        if (isStripKey(k)) return drawStripKey(canvas, p)
         if (k.type == KeyType.PICTO) return drawPicto(canvas, p)
         val activeTab = k.type == KeyType.PAGE && Emoji.pageOf(layout.id) == k.target
         fill.color = when {
@@ -637,6 +701,13 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     private fun drawPopup(canvas: Canvas) {
         val first = popupRects.firstOrNull()?.second ?: return
         val last = popupRects.last().second
+        // La bulle grandit depuis la touche pressée (origine du geste), en 90 ms.
+        val t = Motion.easeOut(Motion.progress(SystemClock.uptimeMillis(), popupStart, Motion.POPUP_MS))
+        val saved = canvas.save()
+        popupKey?.let { k ->
+            val s = 0.6f + 0.4f * t
+            canvas.scale(s, s, k.rect.left + (last.right - first.left) / 2f, k.rect.top)
+        }
         fill.color = if (dark) 0xFF22344F.toInt() else 0xFFFFFFFF.toInt()
         canvas.drawRoundRect(
             RectF(first.left - gap, first.top - gap, last.right + gap, last.bottom + gap),
@@ -653,6 +724,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             val y = rect.centerY() - (text.descent() + text.ascent()) / 2
             canvas.drawText(if (shifted) Alphabet.upper(letter) else letter, rect.centerX(), y, text)
         }
+        canvas.restoreToCount(saved)
     }
 
     // ─── Toucher ────────────────────────────────────────────────
@@ -703,6 +775,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         }
         popupIndex = 0
         popupKey = p
+        popupStart = startMotion()
         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
