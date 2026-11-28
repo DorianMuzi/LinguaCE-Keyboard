@@ -431,11 +431,16 @@ class LinguaImeService : InputMethodService(), KeyboardView.Listener {
     private fun updateSuggestions() {
         val v = view ?: return
         if (!suggest) {
-            v.suggestions = emptyList()
+            v.setSuggestions(emptyList(), false)
             return
         }
         val before = currentInputConnection?.getTextBeforeCursor(MAX_WORD, 0) ?: ""
-        v.suggestions = words.suggest(WordStore.currentWord(before))
+        val word = WordStore.currentWord(before)
+        // Cyrillique : après г к п т ц ч х, la bande propose la combinaison avec
+        // Ӏ (кӀ…) en première case, suivie de deux mots au plus.
+        val chip = if (letters.id == Layouts.CYRILLIC.id) PalochkaHint.chip(word) else null
+        val list = words.suggest(word)
+        v.setSuggestions(if (chip != null) listOf(chip) + list.take(2) else list, chip != null)
     }
 
     private fun learnCurrentWord() {

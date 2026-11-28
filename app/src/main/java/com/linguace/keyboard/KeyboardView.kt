@@ -75,6 +75,21 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
     /** Appelé quand la bande apparaît ou disparaît (zone visible modifiée). */
     var onContentTopChanged: (() -> Unit)? = null
 
+    /** La première case est la combinaison avec Ӏ (кӀ…) et non un mot : voir [PalochkaHint]. */
+    private var chipFirst = false
+
+    /** Définit les cases de la bande ; [chip] : la première est la combinaison avec Ӏ. */
+    fun setSuggestions(words: List<String>, chip: Boolean) {
+        val changed = chip != chipFirst
+        chipFirst = chip
+        if (changed && words == suggestions) {
+            // Mêmes textes, mais la première case change de rôle : on refait la bande.
+            place(); invalidate(); announceChange()
+        } else {
+            suggestions = words
+        }
+    }
+
     /** Mots proposés dans la bande du haut (3 au plus). */
     var suggestions: List<String> = emptyList()
         set(value) {
@@ -343,7 +358,7 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             val w = width.toFloat() / 3
             suggestions.take(3).forEachIndexed { i, word ->
                 out += Placed(
-                    Key(word, KeyType.SUGGESTION),
+                    Key(word, KeyType.SUGGESTION, target = if (i == 0 && chipFirst) "palochka" else ""),
                     RectF(i * w + gap, gap, (i + 1) * w - gap, stripHeight),
                 )
             }
@@ -428,7 +443,8 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
             fill.color = pressedColor
             canvas.drawRoundRect(p.rect, radius, radius, fill)
         }
-        text.color = textColor
+        // La combinaison avec Ӏ se distingue d'un mot : en bleu d'accent.
+        text.color = if (p.key.target == "palochka") accent else textColor
         text.textSize = 17 * density
         var label = p.key.label
         // Mot trop long pour sa case : on le coupe avec « … ».
@@ -930,7 +946,10 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         KeyType.GLOBE -> listener.onGlobe()
         KeyType.SYMBOLS -> listener.onSymbols()
         KeyType.LETTERS -> listener.onLetters()
-        KeyType.SUGGESTION -> listener.onSuggestion(k.label)
+        // кӀ… : on ajoute seulement Ӏ après la lettre déjà tapée (pas d'espace).
+        KeyType.SUGGESTION ->
+            if (k.target == "palochka") listener.onText(PalochkaHint.PALOCHKA)
+            else listener.onSuggestion(k.label)
         KeyType.EMOJI -> listener.onEmojiPanel()
         KeyType.PAGE -> listener.onEmojiPage(k.target)
         KeyType.PICTO -> if (k.label.isNotEmpty()) listener.onEmojiPick(k.label) else Unit
