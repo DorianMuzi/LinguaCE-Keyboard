@@ -602,7 +602,13 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         // rendu validé ne bouge pas.
         // Seules les LETTRES descendent : la virgule, le point et Ӏ (qui ne change
         // pas de forme en majuscules) restent fixes quand on appuie sur MAJ.
-        val capsCyrillic = shifted && layout.id == Layouts.CYRILLIC.id &&
+        // Et seulement dans une rangée qui porte des indices (chiffres, ё, ь) : la
+        // rangée ф…э n'en a pas, ses lettres restent centrées dans la touche
+        // (retour de l'auteur, 2026-11-28). Toute la rangée bouge ensemble, pour
+        // que ses lettres restent alignées entre elles.
+        val rowHasHint = layout.rows.firstOrNull { r -> r.any { it === k } }
+            ?.any { it.variant != null || it.digit != null } == true
+        val capsCyrillic = shifted && layout.id == Layouts.CYRILLIC.id && rowHasHint &&
             k.type == KeyType.CHAR && !k.caseless && k.label.firstOrNull()?.isLetter() == true
         val drop = if ((latin || capsCyrillic) && k.type == KeyType.CHAR) 2.5f * density else 0f
         text.isFakeBoldText = k.type == KeyType.GLOBE
