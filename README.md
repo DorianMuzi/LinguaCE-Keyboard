@@ -45,8 +45,8 @@ partie de l'alphabet tchétchène, mais reste disponible pour les mots
 d'origine étrangère (WhatsApp, Wi-Fi, Wagner…).
 
 **Cyrillique** — ЙЦУКЕН, touche **Ӏ** (U+04C0) dans la rangée du bas ;
-ъ est une touche directe (très fréquent en tchétchène), ь est en appui long sur ъ
-(surtout utile dans les mots russes), ё sur е.
+disposition en 12 colonnes comme Gboard : ъ à droite de la première rangée, Ӏ à
+droite de la deuxième (on la combine souvent avec une consonne), ё sur е.
 
 **КИР / LAT** (l'alphabet visé) passe du latin au cyrillique ; un appui long sur cette touche ouvre le choix du
 clavier système. **⇧** : une majuscule ; deux appuis : verrouillage.

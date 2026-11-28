@@ -138,11 +138,12 @@ object Layouts {
     )
 
     /**
-     * Cyrillique tchétchène : ЙЦУКЕН, avec la touche Ӏ (palochka, U+04C0,
-     * toujours en forme majuscule comme le veut l'usage tchétchène). ъ est une
-     * touche directe (très fréquent en tchétchène : хӀаъ, шиъ…) ; ь, surtout
-     * utile dans les mots russes, est en appui long sur ъ (choix de l'auteur,
-     * 2026-11-28) ; ё sur е.
+     * Cyrillique tchétchène : ЙЦУКЕН en 12 colonnes, comme Gboard (2026-11-28,
+     * à la demande de l'auteur : on combine souvent Ӏ avec une consonne, et
+     * ъ est très fréquent en tchétchène — хӀаъ, шиъ…) : ъ à droite de la
+     * première rangée, Ӏ (palochka, U+04C0, toujours en forme majuscule comme
+     * le veut l'usage tchétchène) à droite de la deuxième. Rangées de 12 :
+     * les touches sont un peu plus étroites qu'à 11. ё sur е.
      */
     val CYRILLIC = Layout(
         "cyrillic",
@@ -150,17 +151,17 @@ object Layouts {
             withDigits(
                 listOf(
                     k("й"), k("ц"), k("у"), k("к"), k("е", "ё"), k("н"), k("г"),
-                    k("ш"), k("щ"), k("з"), k("х"),
+                    k("ш"), k("щ"), k("з"), k("х"), k("ъ"),
                 ),
             ),
-            row("ф ы в а п р о л д ж э"),
+            row("ф ы в а п р о л д ж э") + Key("Ӏ", caseless = true),
             shiftRow(
-                11f,
-                listOf(k("я"), k("ч"), k("с"), k("м"), k("и"), k("т"), k("ъ", "ь"), k("б"), k("ю")),
+                12f,
+                listOf(k("я"), k("ч"), k("с"), k("м"), k("и"), k("т"), k("ь"), k("б"), k("ю")),
             ),
             listOf(
                 Key("🌐", KeyType.GLOBE, 1.25f), Key("123", KeyType.SYMBOLS, 1.25f),
-                comma(), Key("Ӏ", caseless = true), Key(" ", KeyType.SPACE, 3.75f),
+                comma(), Key(" ", KeyType.SPACE, 5.75f),
                 Key("."), Key("↵", KeyType.ENTER, 1.75f),
             ),
         ),

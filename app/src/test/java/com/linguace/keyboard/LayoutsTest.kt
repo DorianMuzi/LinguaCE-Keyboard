@@ -117,6 +117,20 @@ class LayoutsTest {
             }
         }
         assertEquals(10f, Layouts.LATIN.units)
-        assertEquals(11f, Layouts.CYRILLIC.units)
+        assertEquals(12f, Layouts.CYRILLIC.units)
+    }
+
+    @Test
+    fun cyrillic_followsGboard_forHardSignAndPalochka() {
+        val rows = Layouts.CYRILLIC.rows
+        // ъ à droite de la première rangée, Ӏ à droite de la deuxième (12 colonnes).
+        assertEquals("ъ", rows[0].last().label)
+        assertEquals("Ӏ", rows[1].last().label)
+        assertEquals(12, rows[0].size)
+        assertEquals(12, rows[1].size)
+        // Les chiffres restent sur les dix premières touches.
+        assertEquals(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"), rows[0].take(10).map { it.digit })
+        // La rangée du bas n'a plus de touche Ӏ.
+        assertTrue(rows[3].none { it.label == "Ӏ" })
     }
 }
