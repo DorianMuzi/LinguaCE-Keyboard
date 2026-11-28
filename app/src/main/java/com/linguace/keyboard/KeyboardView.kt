@@ -600,7 +600,10 @@ class KeyboardView(context: Context, private val listener: Listener) : View(cont
         // Cyrillique : seulement en majuscules (leurs capitales montent jusqu'aux
         // chiffres de la rangée du haut, retour de l'auteur) ; en minuscules, le
         // rendu validé ne bouge pas.
-        val capsCyrillic = shifted && layout.id == Layouts.CYRILLIC.id
+        // Seules les LETTRES descendent : la virgule, le point et Ӏ (qui ne change
+        // pas de forme en majuscules) restent fixes quand on appuie sur MAJ.
+        val capsCyrillic = shifted && layout.id == Layouts.CYRILLIC.id &&
+            k.type == KeyType.CHAR && !k.caseless && k.label.firstOrNull()?.isLetter() == true
         val drop = if ((latin || capsCyrillic) && k.type == KeyType.CHAR) 2.5f * density else 0f
         text.isFakeBoldText = k.type == KeyType.GLOBE
         val y = p.rect.centerY() - (text.descent() + text.ascent()) / 2 + drop
